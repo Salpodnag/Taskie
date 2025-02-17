@@ -13,11 +13,11 @@ type Config struct {
 }
 
 type Database struct {
-	DBPort     int    `env:"DB_PORT"  env-required:"true"`
-	DBHost     string `env:"DB_HOST"  env-required:"true"`
-	DBName     string `env:"DB_NAME"  env-required:"true"`
-	User       string `env:"DB_USER"  env-required:"true"`
-	DBPassword string `env:"DB_PASSWORD" env-required:"true"`
+	DBPort     int    `env:"DB_PORT"`
+	DBHost     string `env:"DB_HOST"`
+	DBName     string `env:"DB_NAME"`
+	User       string `env:"DB_USER"`
+	DBPassword string `env:"DB_PASSWORD"`
 }
 
 type JWT struct {

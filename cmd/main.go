@@ -2,6 +2,7 @@ package main
 
 import (
 	"Taskie/cfg"
+	"Taskie/db"
 	"fmt"
 )
 
@@ -10,5 +11,10 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("config: %+v\n", *cfg)
+
+	db, err := db.NewClient(cfg)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(db)
 }
