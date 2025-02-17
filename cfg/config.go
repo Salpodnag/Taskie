@@ -8,15 +8,15 @@ import (
 )
 
 type Config struct {
-	db  Database
-	jwt JWT
+	DB  Database
+	JWT JWT
 }
 
 type Database struct {
-	DBPort     int    `env:"DB_PORT"  env-required:"true" env-default:"5432"`
-	DBHost     string `env:"DB_HOST"  env-required:"true" env-default:"localhost"`
-	DBName     string `env:"DB_NAME"  env-required:"true" env-default:"postgres"`
-	User       string `env:"DB_USER"  env-required:"true" env-default:"user"`
+	DBPort     int    `env:"DB_PORT"  env-required:"true"`
+	DBHost     string `env:"DB_HOST"  env-required:"true"`
+	DBName     string `env:"DB_NAME"  env-required:"true"`
+	User       string `env:"DB_USER"  env-required:"true"`
 	DBPassword string `env:"DB_PASSWORD" env-required:"true"`
 }
 
