@@ -3,6 +3,7 @@ package main
 import (
 	"Taskie/cfg"
 	"Taskie/db"
+	"Taskie/internal/repositories"
 	"Taskie/logger"
 	"fmt"
 	"log/slog"
@@ -29,5 +30,6 @@ func main() {
 		)
 		os.Exit(1)
 	}
-	fmt.Println(db)
+	userRepository := repositories.NewUserRepository(db)
+	fmt.Println(userRepository)
 }
