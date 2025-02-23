@@ -32,7 +32,7 @@ func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	err := ah.authService.Register(reqBody.Email, reqBody.Username, reqBody.Password)
 	if err != nil {
-		slog.Warn("Registration failed", slog.String("email", reqBody.Email), slog.String("username", reqBody.Username))
+		slog.Error("Registration failed", slog.String("email", reqBody.Email), slog.String("username", reqBody.Username))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

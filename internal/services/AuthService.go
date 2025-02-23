@@ -4,7 +4,7 @@ import (
 	"Taskie/cfg"
 	"Taskie/internal/models"
 	"Taskie/internal/repositories"
-	"Taskie/utils"
+	"Taskie/internal/utils"
 	"errors"
 	"fmt"
 	"time"
