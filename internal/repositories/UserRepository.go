@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"Taskie/internal/models"
+	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -16,6 +18,53 @@ func NewUserRepository(db *pgx.Conn) *UserRepository {
 	}
 }
 
-func (ur *UserRepository) CreateUser() (*models.User, error) {
+func (ur *UserRepository) CreateUser(user models.User) error {
+	_, err := ur.db.Exec(context.Background(), "INSERT INTO user_account(email, username, password, time_registration) VALUES ($1, $2, $3, $4)",
+		user.Email, user.Username, user.Password, user.TimeRegistration)
+	if err != nil {
+		return fmt.Errorf("failed to insert user: %w", err)
+	}
+	return nil
+}
 
+func (ur *UserRepository) GetUserByEmailOrUsername(name string) (*models.User, error) {
+	var user models.User
+	query := `SELECT id, email, username, time_registration FROM user_account where email=$1 OR username=$1`
+	row := ur.db.QueryRow(context.Background(), query, name)
+	err := row.Scan(&user.Id, &user.Email, &user.TimeRegistration)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, fmt.Errorf("user not found with email/username %w", err)
+		}
+		return nil, fmt.Errorf("failed to get user by email/username %w", err)
+	}
+	return &user, nil
+}
+
+func (ur *UserRepository) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	query := `SELECT id, email, username, time_registration FROM user_account where email=$1 OR username=$1`
+	row := ur.db.QueryRow(context.Background(), query, email)
+	err := row.Scan(&user.Id, &user.Email, &user.Username, &user.TimeRegistration)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, fmt.Errorf("user not found with email %w", err)
+		}
+		return nil, fmt.Errorf("failed to get user by email %w", err)
+	}
+	return &user, nil
+}
+
+func (ur *UserRepository) GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	query := `SELECT id, email, username, time_registration FROM user_account where email=$1 OR username=$1`
+	row := ur.db.QueryRow(context.Background(), query, username)
+	err := row.Scan(&user.Id, &user.Email, &user.TimeRegistration)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, fmt.Errorf("user not found with username %w", err)
+		}
+		return nil, fmt.Errorf("failed to get user by username %w", err)
+	}
+	return &user, nil
 }
