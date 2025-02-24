@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: taskie-app
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env  # Подключаем файл .env
+    depends_on:
+      - db
+    networks:
+      - taskie-network
+
+  db:
+    image: postgres:latest
+    container_name: taskie-db
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=taskie
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - taskie-network
+
+networks:
+  taskie-network:
+    driver: bridge
+
+volumes:
+  pgdata:

@@ -7,8 +7,7 @@ import (
 )
 
 func HashFromPassword(passwordString string) []byte {
-	passwordByte := []byte(passwordString)
-	hash, err := bcrypt.GenerateFromPassword(passwordByte, bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(passwordString), bcrypt.DefaultCost)
 	if err != nil {
 		slog.Error(
 			"failed to hash password",

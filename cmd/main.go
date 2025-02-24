@@ -7,6 +7,7 @@ import (
 	"Taskie/internal/router"
 	"Taskie/internal/services"
 	"Taskie/logger"
+	"Taskie/middlewares"
 	"fmt"
 	"log"
 	"log/slog"
@@ -37,7 +38,8 @@ func main() {
 	userRepository := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(cfg.JWT, *userRepository)
 	r := router.NewRouter(*authService)
+	rWithCORS := middlewares.WithCORS(r)
 	port := ":8080"
 	fmt.Printf("Server running on %s\n", port)
-	log.Fatal(http.ListenAndServe(port, r))
+	log.Fatal(http.ListenAndServe(port, rWithCORS))
 }

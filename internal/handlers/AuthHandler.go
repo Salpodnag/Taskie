@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Taskie/internal/models"
 	"Taskie/internal/services"
 	"encoding/json"
 	"fmt"
@@ -30,6 +31,11 @@ func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if reqBody.Email == "" || reqBody.Username == "" || reqBody.Password == "" {
+		http.Error(w, "email username and password are required", http.StatusBadRequest)
+		return
+	}
+
 	err := ah.authService.Register(reqBody.Email, reqBody.Username, reqBody.Password)
 	if err != nil {
 		slog.Error("Registration failed", slog.String("email", reqBody.Email), slog.String("username", reqBody.Username))
@@ -39,5 +45,35 @@ func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Registration successful"))
+
+}
+
+func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var reqBody struct {
+		Identifier string `json:"identifier"`
+		Password   string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+	user, token, err := ah.authService.Login(reqBody.Identifier, reqBody.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	response := struct {
+		User  *models.User `json:"user"`
+		Token string       `json:"token"`
+	}{
+		User:  user,
+		Token: token,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 
 }

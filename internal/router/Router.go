@@ -12,5 +12,6 @@ func NewRouter(authService services.AuthService) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/register", authHandler.Register)
+	mux.HandleFunc("/login", authHandler.Login)
 	return mux
 }

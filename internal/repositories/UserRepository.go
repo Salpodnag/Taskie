@@ -29,9 +29,10 @@ func (ur *UserRepository) CreateUser(user models.User) error {
 
 func (ur *UserRepository) GetUserByEmailOrUsername(name string) (*models.User, error) {
 	var user models.User
-	query := `SELECT id, email, username, time_registration FROM user_account where email=$1 OR username=$1`
+
+	query := `SELECT id, email, username, password, time_registration FROM user_account where email=$1 OR username=$1`
 	row := ur.db.QueryRow(context.Background(), query, name)
-	err := row.Scan(&user.Id, &user.Email, &user.TimeRegistration)
+	err := row.Scan(&user.Id, &user.Email, &user.Username, &user.Password, &user.TimeRegistration)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, fmt.Errorf("user not found with email/username %w", err)
