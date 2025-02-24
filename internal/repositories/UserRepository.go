@@ -59,7 +59,7 @@ func (ur *UserRepository) GetUserByUsername(username string) (*models.User, erro
 	var user models.User
 	query := `SELECT id, email, username, time_registration FROM user_account where email=$1 OR username=$1`
 	row := ur.db.QueryRow(context.Background(), query, username)
-	err := row.Scan(&user.Id, &user.Email, &user.TimeRegistration)
+	err := row.Scan(&user.Id, &user.Email, &user.Username, &user.TimeRegistration)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, fmt.Errorf("user not found with username %w", err)
