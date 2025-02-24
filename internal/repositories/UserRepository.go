@@ -16,6 +16,8 @@ func NewUserRepository(db *pgx.Conn) *UserRepository {
 	}
 }
 
-func (ur *UserRepository) CreateUser() (*models.User, error) {
+func (ur *UserRepository) CreateUser(email string, username string, password string) (*models.User, error) {
+
+	
 
 }
