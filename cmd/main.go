@@ -4,9 +4,13 @@ import (
 	"Taskie/cfg"
 	"Taskie/db"
 	"Taskie/internal/repositories"
+	"Taskie/internal/router"
+	"Taskie/internal/services"
 	"Taskie/logger"
 	"fmt"
+	"log"
 	"log/slog"
+	"net/http"
 	"os"
 )
 
@@ -31,5 +35,9 @@ func main() {
 		os.Exit(1)
 	}
 	userRepository := repositories.NewUserRepository(db)
-	fmt.Println(userRepository)
+	authService := services.NewAuthService(cfg.JWT, *userRepository)
+	r := router.NewRouter(*authService)
+	port := ":8080"
+	fmt.Printf("Server running on %s\n", port)
+	log.Fatal(http.ListenAndServe(port, r))
 }
