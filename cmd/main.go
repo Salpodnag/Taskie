@@ -41,7 +41,9 @@ func main() {
 
 	userRepository := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(cfg.JWT, *userRepository)
+
 	r := chi.NewRouter()
+
 	r.Use(middlewares.WithCORS)
 
 	r.Mount("/auth", routers.NewAuthRouter(*authService))
