@@ -1,15 +1,14 @@
 package utils
 
 import (
-	"Taskie/internal/models"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJWT(user *models.User, secretKey string) (string, error) {
+func GenerateJWT(userId int, secretKey string) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id": user.Id,
+		"user_id": userId,
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	}
 

@@ -4,7 +4,7 @@ import (
 	"Taskie/cfg"
 	"Taskie/db"
 	"Taskie/internal/repositories"
-	"Taskie/internal/router"
+	"Taskie/internal/routers"
 	"Taskie/internal/services"
 	"Taskie/logger"
 	"Taskie/middlewares"
@@ -13,9 +13,12 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func main() {
+
 	lg := logger.New()
 	slog.SetDefault(lg)
 
@@ -35,11 +38,15 @@ func main() {
 		)
 		os.Exit(1)
 	}
+
 	userRepository := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(cfg.JWT, *userRepository)
-	r := router.NewRouter(*authService)
-	rWithCORS := middlewares.WithCORS(r)
+	r := chi.NewRouter()
+	r.Use(middlewares.WithCORS)
+
+	r.Mount("/auth", routers.NewAuthRouter(*authService))
+
 	port := ":8080"
 	fmt.Printf("Server running on %s\n", port)
-	log.Fatal(http.ListenAndServe(port, rWithCORS))
+	log.Fatal(http.ListenAndServe(port, r))
 }

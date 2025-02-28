@@ -76,7 +76,7 @@ func (as *AuthService) Login(identifier string, password string) (*models.User, 
 		slog.Warn("Invalid password comparison", "identifier", identifier, "user.Password", user.Password, "password", password, "error", err)
 		return nil, "", fmt.Errorf("invalid password %w", err)
 	}
-	token, err := utils.GenerateJWT(user, as.JwtKey.SecretKey)
+	token, err := utils.GenerateJWT(user.Id, as.JwtKey.SecretKey)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to generate jwtToken %w", err)
 	}

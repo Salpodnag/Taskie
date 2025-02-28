@@ -20,6 +20,11 @@ func NewAuthHandler(authService services.AuthService) *AuthHandler {
 }
 
 func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "need POST method", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var reqBody struct {
 		Email    string `json:"email"`
 		Username string `json:"username"`
@@ -45,10 +50,14 @@ func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Registration successful"))
-
 }
 
 func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "need POST method", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var reqBody struct {
 		Identifier string `json:"identifier"`
 		Password   string `json:"password"`
