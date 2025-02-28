@@ -79,7 +79,7 @@ func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		User:  user,
 		Token: token,
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return

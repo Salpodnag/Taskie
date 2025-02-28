@@ -2,7 +2,8 @@ package middlewares
 
 import (
 	"context"
-	"errors"
+	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -39,18 +40,11 @@ func AuthMiddleware(secretKey []byte) func(http.Handler) http.Handler {
 				http.Error(w, "invalid token payload", http.StatusUnauthorized)
 				return
 			}
+			fmt.Println("middleware")
 			userID := int(userIDFloat)
-
+			slog.Error("midla", userID)
 			ctx := context.WithValue(r.Context(), UserIDKey, userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
-}
-
-func GetUserID(ctx context.Context) (int, error) {
-	userID, ok := ctx.Value(UserIDKey).(int)
-	if !ok {
-		return 0, errors.New("user ID not found in context")
-	}
-	return userID, nil
 }

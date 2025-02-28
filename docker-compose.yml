@@ -38,4 +38,3 @@ networks:
 
 volumes:
   pg_data:
-

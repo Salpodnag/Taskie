@@ -41,12 +41,16 @@ func main() {
 
 	userRepository := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(cfg.JWT, *userRepository)
+	projectRepository := repositories.NewProjectRepository(db)
+	projectService := services.NewProjectService(*projectRepository)
 
 	r := chi.NewRouter()
 
-	r.Use(middlewares.WithCORS)
+	r.Use(middlewares.CorsMiddleware)
+	r.Use(middlewares.AuthMiddleware([]byte(cfg.JWT.SecretKey)))
 
 	r.Mount("/auth", routers.NewAuthRouter(*authService))
+	r.Mount("/project", routers.NewProjectRouter(*projectService))
 
 	port := ":8080"
 	fmt.Printf("Server running on %s\n", port)
