@@ -3,7 +3,6 @@ package middlewares
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,38 +12,37 @@ type contextKey string
 
 const UserIDKey contextKey = "userID"
 
-func AuthMiddleware(secretKey []byte) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+const secretKey = "fds"
 
-			cookie, err := r.Cookie("token")
-			if err != nil {
-				http.Error(w, "missing token cookie", http.StatusUnauthorized)
-				return
-			}
+func JWTMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			tokenString := cookie.Value
-			claims := jwt.MapClaims{}
+		cookie, err := r.Cookie("token")
+		if err != nil {
+			http.Error(w, "missing token cookie", http.StatusUnauthorized)
+			return
+		}
 
-			token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
-				return secretKey, nil
-			})
+		tokenString := cookie.Value
+		claims := jwt.MapClaims{}
 
-			if err != nil || !token.Valid {
-				http.Error(w, "invalid or expired token", http.StatusUnauthorized)
-				return
-			}
-
-			userIDFloat, ok := claims["user_id"].(float64)
-			if !ok {
-				http.Error(w, "invalid token payload", http.StatusUnauthorized)
-				return
-			}
-			fmt.Println("middleware")
-			userID := int(userIDFloat)
-			slog.Error("midla", userID)
-			ctx := context.WithValue(r.Context(), UserIDKey, userID)
-			next.ServeHTTP(w, r.WithContext(ctx))
+		token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
+			return secretKey, nil
 		})
-	}
+
+		if err != nil || !token.Valid {
+			http.Error(w, "invalid or expired token", http.StatusUnauthorized)
+			return
+		}
+
+		userIDFloat, ok := claims["user_id"].(float64)
+		if !ok {
+			http.Error(w, "invalid token payload", http.StatusUnauthorized)
+			return
+		}
+		fmt.Println("middleware")
+		userID := int(userIDFloat)
+		ctx := context.WithValue(r.Context(), UserIDKey, userID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }

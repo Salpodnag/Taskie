@@ -4,18 +4,9 @@ import (
 	"net/http"
 )
 
-// func CorsHeaders() func(http.Handler) http.Handler {
-// 	return cors.New(cors.Options{
-// 		AllowedOrigins:   []string{"*"},
-// 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-// 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
-// 		AllowCredentials: true,
-// 	}).Handler
-// }
-
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "http://217.114.2.143:3000")
 
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 

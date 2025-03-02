@@ -73,13 +73,17 @@ func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response := struct {
-		User  *models.User `json:"user"`
-		Token string       `json:"token"`
+		User *models.User `json:"user"`
+		// Token string       `json:"token"`
 	}{
-		User:  user,
-		Token: token,
+		User: user,
+		// Token: token,
 	}
-
+	http.SetCookie(w, &http.Cookie{
+		Name:  "set-token",
+		Value: token,
+	})
+	w.WriteHeader(200)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return

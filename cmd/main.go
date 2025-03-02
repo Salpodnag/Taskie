@@ -47,7 +47,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(middlewares.CorsMiddleware)
-	r.Use(middlewares.AuthMiddleware([]byte(cfg.JWT.SecretKey)))
+	// r.Use(middlewares.JWTMiddleware([]byte(cfg.JWT.SecretKey)))
 
 	r.Mount("/auth", routers.NewAuthRouter(*authService))
 	r.Mount("/project", routers.NewProjectRouter(*projectService))
