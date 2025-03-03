@@ -42,7 +42,7 @@ func main() {
 	userRepository := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(cfg.JWT, *userRepository)
 	projectRepository := repositories.NewProjectRepository(db)
-	projectService := services.NewProjectService(*projectRepository)
+	projectService := services.NewProjectService(*projectRepository, *userRepository)
 
 	r := chi.NewRouter()
 

@@ -10,9 +10,9 @@ import (
 func NewProjectRouter(projectService services.ProjectService) chi.Router {
 	r := chi.NewRouter()
 
-	ProjectHandler := handlers.NewProjectHandler(projectService)
+	projectHandler := handlers.NewProjectHandler(projectService)
 
-	r.Post("/project", ProjectHandler.Create)
+	r.Post("/project", projectHandler.Create)
 
 	return r
 }

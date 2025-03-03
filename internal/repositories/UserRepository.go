@@ -19,8 +19,8 @@ func NewUserRepository(db *pgx.Conn) *UserRepository {
 }
 
 func (ur *UserRepository) CreateUser(user models.User) error {
-	_, err := ur.db.Exec(context.Background(), "INSERT INTO user_account(email, username, password, time_registration) VALUES ($1, $2, $3, $4)",
-		user.Email, user.Username, user.Password, user.TimeRegistration)
+	err := ur.db.QueryRow(context.Background(), "INSERT INTO user_account(email, username, password, time_registration) VALUES ($1, $2, $3, $4) RETURNING id",
+		user.Email, user.Username, user.Password, user.TimeRegistration).Scan(&user.Id)
 	if err != nil {
 		return fmt.Errorf("failed to insert user: %w", err)
 	}
@@ -71,6 +71,7 @@ func (ur *UserRepository) GetUserByUsername(username string) (*models.User, erro
 }
 
 func (ur *UserRepository) GetUserById(id int) (*models.User, error) {
+
 	var user models.User
 
 	query := `SELECT id, email, username, time_registration FROM user_account where  id=$1`

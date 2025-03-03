@@ -5,33 +5,47 @@ import (
 	"Taskie/middlewares"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 )
 
 type ProjectHandler struct {
-	ProjectHandler services.ProjectService
+	ProjectService services.ProjectService
 }
 
 func NewProjectHandler(ProjectService services.ProjectService) *ProjectHandler {
 	return &ProjectHandler{
-		ProjectHandler: ProjectService,
+		ProjectService: ProjectService,
 	}
 }
 
 func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middlewares.GetUserID(r)
-	var reqBody struct {
-		name string `json: "name"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+	if !ok {
+		slog.Error("user's id not found in Project creation")
+		http.Error(w, "userId not found", http.StatusUnauthorized)
 		return
 	}
 
-	// if reqBody.name == "" || reqBody.t == "" || reqBody.Password == "" {
-	// 	http.Error(w, "email username and password are required", http.StatusBadRequest)
-	// 	return
-	// }
+	var reqBody struct {
+		Name string `json:"name"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		slog.Error("invalid request body", slog.Any("request", r.Body), slog.Any("err", err))
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+	if reqBody.Name == "" {
+		http.Error(w, fmt.Sprintf("Missing name"), http.StatusBadRequest)
+	}
+	project, err := ph.ProjectService.Create(reqBody.Name, userID)
+	if err != nil {
+		slog.Error("failed to create project", slog.String("name", reqBody.Name), slog.Any("err", err))
+	}
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(project); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 
 }
