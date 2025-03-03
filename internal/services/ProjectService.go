@@ -28,5 +28,9 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 		return nil, fmt.Errorf("failed to get user by id %d: %w", userId, err)
 	}
 	project.Owner = *owner
+	err = ps.ProjectRepo.CreateProject(&project)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create project: %w", err)
+	}
 	return &project, nil
 }

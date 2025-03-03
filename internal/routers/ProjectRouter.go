@@ -12,7 +12,7 @@ func NewProjectRouter(projectService services.ProjectService) chi.Router {
 
 	projectHandler := handlers.NewProjectHandler(projectService)
 
-	r.Post("/project", projectHandler.Create)
+	r.Post("/", projectHandler.Create)
 
 	return r
 }

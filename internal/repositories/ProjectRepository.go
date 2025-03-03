@@ -18,9 +18,12 @@ func NewProjectRepository(db *pgx.Conn) *ProjectRepository {
 	}
 }
 
-func (pr *ProjectRepository) CreateProject(project models.Project) error {
-	_, err := pr.db.Exec(context.Background(), "INSERT INTO project(name, owner_id, createdAt) VALUES ($1, $2, $3)",
-		project.Name, project.Owner.Id, project.CreatedAt)
+func (pr *ProjectRepository) CreateProject(project *models.Project) error {
+	query := `
+        INSERT INTO project (name, created_at, owner_id)
+        VALUES ($1, $2, $3)
+        RETURNING id`
+	err := pr.db.QueryRow(context.Background(), query, project.Name, project.CreatedAt, project.Owner.Id).Scan(&project.Id)
 	if err != nil {
 		return fmt.Errorf("failed to insert project: %w", err)
 	}
