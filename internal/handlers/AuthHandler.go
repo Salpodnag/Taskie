@@ -41,15 +41,17 @@ func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := ah.authService.Register(reqBody.Email, reqBody.Username, reqBody.Password)
+	user, err := ah.authService.Register(reqBody.Email, reqBody.Username, reqBody.Password)
 	if err != nil {
 		slog.Error("Registration failed", slog.String("email", reqBody.Email), slog.String("username", reqBody.Username))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Registration successful"))
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {

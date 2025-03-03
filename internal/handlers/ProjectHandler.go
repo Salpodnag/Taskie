@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 type ProjectHandler struct {
@@ -22,14 +21,17 @@ func NewProjectHandler(ProjectService services.ProjectService) *ProjectHandler {
 func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middlewares.GetUserID(r)
 	var reqBody struct {
-		name      string    `json: "name"`
-		timeAdded time.Time `json: "timeAdded"`
-		CreatedAt time.Time `json: "CreatedAt"`
+		name string `json: "name"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 		return
 	}
+
+	// if reqBody.name == "" || reqBody.t == "" || reqBody.Password == "" {
+	// 	http.Error(w, "email username and password are required", http.StatusBadRequest)
+	// 	return
+	// }
 
 }
