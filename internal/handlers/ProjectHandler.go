@@ -49,3 +49,24 @@ func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
+	var id int
+	if err := json.NewDecoder(r.Body).Decode(&id); err != nil {
+		slog.Error("failed to get project ID from response", slog.String("id", string(id)))
+		return
+	}
+	if id == 0 {
+		slog.Error("missing id", slog.String("id", string(id)))
+	}
+	project, err := ph.ProjectService.Get(id)
+	if err != nil {
+		slog.Error("failed to get project by id", slog.String("id", string(id)))
+		return
+	}
+	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(project); err != nil {
+		slog.Error("failed to encode project")
+		return
+	}
+}

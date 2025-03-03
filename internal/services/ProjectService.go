@@ -34,3 +34,11 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 	}
 	return &project, nil
 }
+
+func (ps *ProjectService) Get(id int) (*models.Project, error) {
+	project, err := ps.ProjectRepo.GetProjectById(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get project by id: %w", err)
+	}
+	return project, nil
+}
