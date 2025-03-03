@@ -69,3 +69,18 @@ func (ur *UserRepository) GetUserByUsername(username string) (*models.User, erro
 	}
 	return &user, nil
 }
+
+func (ur *UserRepository) GetUserById(id int) (*models.User, error) {
+	var user models.User
+
+	query := `SELECT id, email, username, time_registration FROM user_account where  id=$1`
+	row := ur.db.QueryRow(context.Background(), query, id)
+	err := row.Scan(&user.Id, &user.Email, &user.Username, &user.Password, &user.TimeRegistration)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, fmt.Errorf("user not found with id %w", err)
+		}
+		return nil, fmt.Errorf("failed to get user by id %w", err)
+	}
+	return &user, nil
+}

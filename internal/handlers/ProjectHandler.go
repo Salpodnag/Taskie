@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"Taskie/internal/services"
+	"Taskie/middlewares"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -19,6 +20,7 @@ func NewProjectHandler(ProjectService services.ProjectService) *ProjectHandler {
 }
 
 func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middlewares.GetUserID(r)
 	var reqBody struct {
 		name      string    `json: "name"`
 		timeAdded time.Time `json: "timeAdded"`

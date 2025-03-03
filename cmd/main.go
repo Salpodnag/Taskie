@@ -47,10 +47,13 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(middlewares.CorsMiddleware)
-	// r.Use(middlewares.JWTMiddleware([]byte(cfg.JWT.SecretKey)))
 
 	r.Mount("/auth", routers.NewAuthRouter(*authService))
-	r.Mount("/project", routers.NewProjectRouter(*projectService))
+
+	r.Group(func(r chi.Router) {
+		r.Use(middlewares.JWTMiddleware)
+		r.Mount("/project", routers.NewProjectRouter(*projectService))
+	})
 
 	port := ":8080"
 	fmt.Printf("Server running on %s\n", port)
