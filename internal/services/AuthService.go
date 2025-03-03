@@ -44,7 +44,7 @@ func (as *AuthService) CheckUserExists(email string, username string) (bool, err
 	return false, nil
 }
 
-func (as *AuthService) Register(email string, username string, password string) error {
+func (as *AuthService) Register(email string, username string, password string) (*models.User, error) {
 	var user models.User
 	hashedPassword := utils.HashFromPassword(password)
 	user.Email = email
@@ -52,15 +52,15 @@ func (as *AuthService) Register(email string, username string, password string) 
 	user.Password = string(hashedPassword)
 	user.TimeRegistration = time.Now()
 	if exists, err := as.CheckUserExists(email, username); err != nil {
-		return err
+		return nil, err
 	} else if exists {
-		return fmt.Errorf("user already exists")
+		return nil, fmt.Errorf("user already exists")
 	}
 	err := as.UserRepo.CreateUser(user)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &user, nil
 }
 
 func (as *AuthService) Login(identifier string, password string) (*models.User, string, error) {
