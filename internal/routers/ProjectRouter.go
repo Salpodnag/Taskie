@@ -13,7 +13,7 @@ func NewProjectRouter(projectService services.ProjectService) chi.Router {
 	projectHandler := handlers.NewProjectHandler(projectService)
 
 	r.Post("/", projectHandler.Create)
-	r.Get("/", projectHandler.GetById)
+	r.Get("/{id}", projectHandler.GetById)
 
 	return r
 }

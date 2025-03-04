@@ -40,5 +40,11 @@ func (ps *ProjectService) Get(id int) (*models.Project, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get project by id: %w", err)
 	}
+	owner, err := ps.UserRepo.GetUserById(project.Owner.Id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by id: %w", err)
+	}
+
+	project.Owner = *owner
 	return project, nil
 }

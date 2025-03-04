@@ -5,8 +5,10 @@ import (
 	"Taskie/middlewares"
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"log/slog"
 	"net/http"
+	"strconv"
 )
 
 type ProjectHandler struct {
@@ -51,17 +53,17 @@ func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
-	var id int
-	if err := json.NewDecoder(r.Body).Decode(&id); err != nil {
-		slog.Error("failed to get project ID from response", slog.String("id", string(id)))
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		slog.Error("invalid id format", slog.String("id", strconv.Itoa(id)))
 		return
 	}
 	if id == 0 {
-		slog.Error("missing id", slog.String("id", string(id)))
+		slog.Error("missing id", slog.String("id", strconv.Itoa(id)))
 	}
 	project, err := ph.ProjectService.Get(id)
 	if err != nil {
-		slog.Error("failed to get project by id", slog.String("id", string(id)))
+		slog.Error("failed to get project by id", slog.String("id", strconv.Itoa(id)))
 		return
 	}
 	w.WriteHeader(200)

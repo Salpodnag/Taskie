@@ -31,17 +31,15 @@ func (pr *ProjectRepository) CreateProject(project *models.Project) error {
 }
 
 func (pr *ProjectRepository) GetProjectById(id int) (*models.Project, error) {
-	var user models.User
 	var project models.Project
 	query := `
 			SELECT id, name, created_at, owner_id 
 			FROM project 
 			WHERE id = $1`
 	row := pr.db.QueryRow(context.Background(), query, id)
-	err := row.Scan(&project.Id, &project.Name, &project.CreatedAt, &project.Owner)
+	err := row.Scan(&project.Id, &project.Name, &project.CreatedAt, &project.Owner.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to ged project by id: %w", err)
 	}
-	project.Owner = user
 	return &project, nil
 }

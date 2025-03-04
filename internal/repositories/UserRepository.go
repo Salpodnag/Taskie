@@ -44,7 +44,10 @@ func (ur *UserRepository) GetUserByEmailOrUsername(name string) (*models.User, e
 
 func (ur *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	query := `SELECT id, email, username, time_registration FROM user_account where email=$1 OR username=$1`
+	query := `
+			SELECT id, email, username, time_registration 
+			FROM user_account 
+			WHERE email=$1 OR username=$1`
 	row := ur.db.QueryRow(context.Background(), query, email)
 	err := row.Scan(&user.Id, &user.Email, &user.Username, &user.TimeRegistration)
 	if err != nil {
@@ -58,7 +61,10 @@ func (ur *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 
 func (ur *UserRepository) GetUserByUsername(username string) (*models.User, error) {
 	var user models.User
-	query := `SELECT id, email, username, time_registration FROM user_account where email=$1 OR username=$1`
+	query := `
+			SELECT id, email, username, time_registration 
+			FROM user_account 
+			WHERE email=$1 OR username=$1`
 	row := ur.db.QueryRow(context.Background(), query, username)
 	err := row.Scan(&user.Id, &user.Email, &user.Username, &user.TimeRegistration)
 	if err != nil {
@@ -74,7 +80,10 @@ func (ur *UserRepository) GetUserById(id int) (*models.User, error) {
 
 	var user models.User
 
-	query := `SELECT id, email, username, time_registration FROM user_account where  id=$1`
+	query := `
+			SELECT id, email, username, time_registration 
+			FROM user_account 
+			WHERE  id=$1`
 	row := ur.db.QueryRow(context.Background(), query, id)
 	err := row.Scan(&user.Id, &user.Email, &user.Username, &user.TimeRegistration)
 	if err != nil {
