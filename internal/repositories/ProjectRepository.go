@@ -47,7 +47,7 @@ func (pr *ProjectRepository) GetProjectById(id int) (*models.Project, error) {
 func (pr *ProjectRepository) GetAllProjects(id int) ([]models.Project, error) {
 	projects := make([]models.Project, 0)
 	query := `
-			SELECT p.id, p.name, p.created_at, u.name, u.email, u.username, u.time_registration
+			SELECT p.id, p.name, p.created_at, u.id, u.email, u.username, u.time_registration
 			FROM project p
 			LEFT JOIN user_account u 
 			ON p.owner_id = u.id

@@ -6,7 +6,7 @@ import (
 
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://217.114.2.143:3000")
+		w.Header().Set("Access-Control-Allow-Origin", "http://62.113.98.50:3000")
 
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
