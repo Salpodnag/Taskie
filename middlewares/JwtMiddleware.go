@@ -16,7 +16,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		secretKey := os.Getenv("JWT_SECRET")
 
-		cookie, err := r.Cookie("token")
+		cookie, err := r.Cookie("set-token")
 		if err != nil {
 			http.Error(w, "missing token cookie", http.StatusUnauthorized)
 			return

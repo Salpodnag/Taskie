@@ -5,10 +5,11 @@ import (
 	"Taskie/middlewares"
 	"encoding/json"
 	"fmt"
-	"github.com/go-chi/chi/v5"
 	"log/slog"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type ProjectHandler struct {
@@ -68,6 +69,19 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(200)
 	if err := json.NewEncoder(w).Encode(project); err != nil {
+		slog.Error("failed to encode project")
+		return
+	}
+}
+
+func (ph *ProjectHandler) GetAllProjects(w http.ResponseWriter, r *http.Request) {
+	projects, err := ph.ProjectService.GetAllProjects()
+	if err != nil {
+		slog.Error("failed to get all projects")
+		return
+	}
+	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(projects); err != nil {
 		slog.Error("failed to encode project")
 		return
 	}

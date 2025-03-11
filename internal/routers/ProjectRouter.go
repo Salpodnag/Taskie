@@ -14,6 +14,7 @@ func NewProjectRouter(projectService services.ProjectService) chi.Router {
 
 	r.Post("/", projectHandler.Create)
 	r.Get("/{id}", projectHandler.GetById)
+	r.Get("/", projectHandler.GetAllProjects)
 
 	return r
 }

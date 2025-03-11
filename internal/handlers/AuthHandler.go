@@ -84,6 +84,7 @@ func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "set-token",
 		Value: token,
+		Path:     "/",   
 	})
 	w.WriteHeader(200)
 	if err := json.NewEncoder(w).Encode(response); err != nil {

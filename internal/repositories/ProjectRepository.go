@@ -39,7 +39,25 @@ func (pr *ProjectRepository) GetProjectById(id int) (*models.Project, error) {
 	row := pr.db.QueryRow(context.Background(), query, id)
 	err := row.Scan(&project.Id, &project.Name, &project.CreatedAt, &project.Owner.Id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to ged project by id: %w", err)
+		return nil, fmt.Errorf("failed to get project by id: %w", err)
 	}
 	return &project, nil
+}
+
+func (pr *ProjectRepository) GetAllProjects() ([]models.Project, error) {
+	projects := []models.Project{}
+	project := models.Project{}
+	query := `
+			SELECT id, name, created_at, owner_id
+			FROM project`
+	rows, err := pr.db.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all projects: %w", err)
+	}
+	for rows.Next() {
+		rows.Scan(&project.Id, &project.Name, &project.CreatedAt, &project.Owner.Id)
+		projects = append(projects, project)
+	}
+
+	return projects, nil
 }
