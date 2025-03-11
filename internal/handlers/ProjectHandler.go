@@ -75,7 +75,13 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ph *ProjectHandler) GetAllProjects(w http.ResponseWriter, r *http.Request) {
-	projects, err := ph.ProjectService.GetAllProjects()
+	userId, ok := middlewares.GetUserID(r)
+	if !ok {
+		slog.Error("user's id not found in Project creation")
+		http.Error(w, "userId not found", http.StatusUnauthorized)
+		return
+	}
+	projects, err := ph.ProjectService.GetAllProjects(userId)
 	if err != nil {
 		slog.Error("failed to get all projects")
 		return

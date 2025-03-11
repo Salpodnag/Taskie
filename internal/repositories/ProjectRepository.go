@@ -44,18 +44,26 @@ func (pr *ProjectRepository) GetProjectById(id int) (*models.Project, error) {
 	return &project, nil
 }
 
-func (pr *ProjectRepository) GetAllProjects() ([]models.Project, error) {
-	projects := []models.Project{}
-	project := models.Project{}
+func (pr *ProjectRepository) GetAllProjects(id int) ([]models.Project, error) {
+	projects := make([]models.Project, 0)
 	query := `
-			SELECT id, name, created_at, owner_id
-			FROM project`
-	rows, err := pr.db.Query(context.Background(), query)
+			SELECT p.id, p.name, p.created_at, u.name, u.email, u.username, u.time_registration
+			FROM project p
+			LEFT JOIN user_account u 
+			ON p.owner_id = u.id
+			WHERE u.id = $1`
+	rows, err := pr.db.Query(context.Background(), query, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all projects: %w", err)
 	}
 	for rows.Next() {
-		rows.Scan(&project.Id, &project.Name, &project.CreatedAt, &project.Owner.Id)
+		var project models.Project
+		var owner models.User
+		err := rows.Scan(&project.Id, &project.Name, &project.CreatedAt, &owner.Id, &owner.Email, &owner.Username, &owner.TimeRegistration)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get all projects: %w", err)
+		}
+		project.Owner = owner
 		projects = append(projects, project)
 	}
 

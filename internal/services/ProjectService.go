@@ -49,17 +49,10 @@ func (ps *ProjectService) Get(id int) (*models.Project, error) {
 	return project, nil
 }
 
-func (ps *ProjectService) GetAllProjects() ([]models.Project, error) {
-	projects, err := ps.ProjectRepo.GetAllProjects()
+func (ps *ProjectService) GetAllProjects(userId int) ([]models.Project, error) {
+	projects, err := ps.ProjectRepo.GetAllProjects(userId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all project: %w", err)
-	}
-	for _, project := range projects {
-		owner, err := ps.UserRepo.GetUserById(project.Owner.Id)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get user by id: %w", err)
-		}
-		project.Owner = *owner
 	}
 	return projects, nil
 }
