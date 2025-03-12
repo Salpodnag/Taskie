@@ -56,3 +56,11 @@ func (ps *ProjectService) GetAllProjects(userId int) ([]models.Project, error) {
 	}
 	return projects, nil
 }
+
+func (ps *ProjectService) Delete(id int) error {
+	err := ps.ProjectRepo.DeleteProject(id)
+	if err != nil {
+		return fmt.Errorf("failed to delete project: %w", err)
+	}
+	return nil
+}

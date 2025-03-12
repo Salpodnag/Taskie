@@ -69,3 +69,14 @@ func (pr *ProjectRepository) GetAllProjects(id int) ([]models.Project, error) {
 
 	return projects, nil
 }
+
+func (pr *ProjectRepository) DeleteProject(id int) error {
+	query := `
+		DELETE FROM project
+		WHERE id = $1`
+	_, err := pr.db.Exec(context.Background(), query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete project: %w", err)
+	}
+	return nil
+}

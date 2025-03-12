@@ -92,3 +92,20 @@ func (ph *ProjectHandler) GetAllProjects(w http.ResponseWriter, r *http.Request)
 		return
 	}
 }
+
+func (ph *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		slog.Error("invalid id format", slog.String("id", strconv.Itoa(id)))
+		return
+	}
+	if id == 0 {
+		slog.Error("missing id", slog.String("id", strconv.Itoa(id)))
+	}
+	err = ph.ProjectService.Delete(id)
+	if err != nil {
+		slog.Error("failed to delete project", slog.String("id", strconv.Itoa(id)))
+		return
+	}
+	w.WriteHeader(204)
+}
