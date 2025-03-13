@@ -8,6 +8,7 @@ import (
 	"Taskie/internal/services"
 	"Taskie/logger"
 	"Taskie/middlewares"
+	"Taskie/websockets"
 	"fmt"
 	"log"
 	"log/slog"
@@ -18,6 +19,8 @@ import (
 )
 
 func main() {
+
+	hub := websockets.NewHub()
 
 	lg := logger.New()
 	slog.SetDefault(lg)
@@ -42,12 +45,12 @@ func main() {
 	userRepository := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(cfg.JWT, *userRepository)
 	projectRepository := repositories.NewProjectRepository(db)
-	projectService := services.NewProjectService(*projectRepository, *userRepository)
+	projectService := services.NewProjectService(*projectRepository, *userRepository, hub)
 
 	r := chi.NewRouter()
 
 	r.Use(middlewares.CorsMiddleware)
-
+	r.Get("/ws", websockets.WsHandler)
 	r.Mount("/auth", routers.NewAuthRouter(*authService))
 
 	r.Group(func(r chi.Router) {

@@ -3,7 +3,6 @@ package routers
 import (
 	"Taskie/internal/handlers"
 	"Taskie/internal/services"
-
 	"github.com/go-chi/chi/v5"
 )
 

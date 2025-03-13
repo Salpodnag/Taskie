@@ -3,6 +3,8 @@ package services
 import (
 	"Taskie/internal/models"
 	"Taskie/internal/repositories"
+	"Taskie/websockets"
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -10,12 +12,14 @@ import (
 type ProjectService struct {
 	ProjectRepo repositories.ProjectRepository
 	UserRepo    repositories.UserRepository
+	hub         *websockets.Hub
 }
 
-func NewProjectService(pr repositories.ProjectRepository, ur repositories.UserRepository) *ProjectService {
+func NewProjectService(pr repositories.ProjectRepository, ur repositories.UserRepository, hub *websockets.Hub) *ProjectService {
 	return &ProjectService{
 		ProjectRepo: pr,
 		UserRepo:    ur,
+		hub:         hub,
 	}
 }
 
@@ -32,6 +36,12 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to create project: %w", err)
 	}
+	project_json, err := json.Marshal(project)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal project: %w", err)
+	}
+	ps.hub.SendToUser(userId, project_json)
+
 	return &project, nil
 }
 
