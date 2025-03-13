@@ -40,7 +40,8 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal project: %w", err)
 	}
-	ps.hub.SendToUser(userId, project_json)
+	//ps.hub.SendToUser(userId, project_json) ИСПОЛЬЗОВАТЬ КОГДА ПОЙМУ ЛОГИКА
+	ps.hub.Broadcast(project_json)
 
 	return &project, nil
 }
