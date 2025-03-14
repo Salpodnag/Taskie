@@ -31,7 +31,7 @@ func (as *AuthService) CheckUserExists(email string, username string) (bool, err
 	if err == nil {
 		return true, nil
 	} else if !errors.Is(err, pgx.ErrNoRows) {
-		return false, fmt.Errorf("failed to check if user exists by email: %w", err)
+		return false, fmt.Errorf("failed to check if user exists by email (что-то не так): %w", err)
 	}
 
 	_, err = as.UserRepo.GetUserByUsername(username)

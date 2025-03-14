@@ -1,0 +1,8 @@
+root = "."
+temp_dir = "tmp"
+
+[build]
+  cmd = "go build -o main ./cmd/main.go"
+  bin = "main"
+  include_ext = ["go"]
+  exclude_dir = ["vendor", "tmp"]

@@ -1,9 +1,10 @@
 package websockets
 
 import (
-	"github.com/gorilla/websocket"
 	"log"
 	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 type Hub struct {
@@ -17,10 +18,10 @@ func NewHub() *Hub {
 	}
 }
 
-func (hub *Hub) RegisterClient(UserID int, conn *websocket.Conn) {
+func (hub *Hub) RegisterClient(userID int, conn *websocket.Conn) {
 	hub.mu.Lock()
 	defer hub.mu.Unlock()
-	hub.clients[UserID] = conn
+	hub.clients[userID] = conn
 }
 
 func (hub *Hub) UnregisterClient(userID int) {
@@ -38,12 +39,13 @@ func (hub *Hub) Broadcast(message []byte) {
 	defer hub.mu.Unlock()
 
 	for userID, conn := range hub.clients {
-		err := conn.WriteMessage(websocket.TextMessage, message)
-		if err != nil {
-			log.Printf("Ошибка отправки WebSocket-сообщения клиенту %d: %v", userID, err)
-			conn.Close()
-			delete(hub.clients, userID)
-		}
+
+		go func(c *websocket.Conn, id int) {
+			if err := c.WriteMessage(websocket.TextMessage, message); err != nil {
+				log.Printf("Ошибка отправки пользователю %d: %v", id, err)
+				hub.UnregisterClient(id)
+			}
+		}(conn, userID)
 	}
 }
 
@@ -52,11 +54,11 @@ func (hub *Hub) SendToUser(userID int, message []byte) {
 	defer hub.mu.Unlock()
 
 	if conn, ok := hub.clients[userID]; ok {
-		err := conn.WriteMessage(websocket.TextMessage, message)
-		if err != nil {
-			log.Printf("Ошибка отправки сообщения пользователю %d: %v", userID, err)
-			conn.Close()
-			delete(hub.clients, userID)
-		}
+		go func() {
+			if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
+				log.Println("Ошибка отправки:", err)
+				hub.UnregisterClient(userID)
+			}
+		}()
 	}
 }

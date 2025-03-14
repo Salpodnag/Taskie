@@ -4,22 +4,21 @@ import (
 	"Taskie/internal/models"
 	"Taskie/internal/repositories"
 	"Taskie/websockets"
-	"encoding/json"
 	"fmt"
 	"time"
 )
 
 type ProjectService struct {
-	ProjectRepo repositories.ProjectRepository
-	UserRepo    repositories.UserRepository
-	hub         *websockets.Hub
+	ProjectRepo      repositories.ProjectRepository
+	UserRepo         repositories.UserRepository
+	WebSocketService *websockets.WebSocketService
 }
 
-func NewProjectService(pr repositories.ProjectRepository, ur repositories.UserRepository, hub *websockets.Hub) *ProjectService {
+func NewProjectService(pr repositories.ProjectRepository, ur repositories.UserRepository, ws *websockets.WebSocketService) *ProjectService {
 	return &ProjectService{
-		ProjectRepo: pr,
-		UserRepo:    ur,
-		hub:         hub,
+		ProjectRepo:      pr,
+		UserRepo:         ur,
+		WebSocketService: ws,
 	}
 }
 
@@ -36,12 +35,10 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to create project: %w", err)
 	}
-	project_json, err := json.Marshal(project)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal project: %w", err)
+
+	if err := ps.WebSocketService.SendMessageBroadcast("project", project); err != nil {
+		return nil, fmt.Errorf("failed to send project message: %w", err)
 	}
-	//ps.hub.SendToUser(userId, project_json) ИСПОЛЬЗОВАТЬ КОГДА ПОЙМУ ЛОГИКА
-	ps.hub.Broadcast(project_json)
 
 	return &project, nil
 }
@@ -65,6 +62,7 @@ func (ps *ProjectService) GetAllProjects(userId int) ([]models.Project, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all project: %w", err)
 	}
+	ps.WebSocketService.SendMessageBroadcast("projects", projects)
 	return projects, nil
 }
 

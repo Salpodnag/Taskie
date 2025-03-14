@@ -1,20 +1,20 @@
 package websockets
 
 import (
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/gorilla/websocket"
-	"log"
 	"net/http"
 	"os"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/gorilla/websocket"
 )
 
-var hub = NewHub()
-
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
+	CheckOrigin:     func(r *http.Request) bool { return true },
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
-func WsHandler(w http.ResponseWriter, r *http.Request) {
+func WsHandler(w http.ResponseWriter, r *http.Request, hub *Hub) {
 	secretKey := os.Getenv("JWT_SECRET")
 	cookie, err := r.Cookie("set-token")
 	if err != nil {
@@ -39,11 +39,18 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Ошибка WebSocket:", err)
+
 		return
 	}
 
 	hub.RegisterClient(userID, conn)
-	defer hub.UnregisterClient(userID)
 
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+	}
+
+	hub.UnregisterClient(userID)
 }

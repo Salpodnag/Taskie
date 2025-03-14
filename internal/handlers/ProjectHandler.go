@@ -41,16 +41,13 @@ func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	if reqBody.Name == "" {
 		http.Error(w, fmt.Sprintf("Missing name"), http.StatusBadRequest)
+		return
 	}
-	project, err := ph.ProjectService.Create(reqBody.Name, userID)
+	_, err := ph.ProjectService.Create(reqBody.Name, userID)
 	if err != nil {
 		slog.Error("failed to create project", slog.String("name", reqBody.Name), slog.Any("err", err))
 	}
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(project); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	}
-
 }
 
 func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
@@ -81,16 +78,13 @@ func (ph *ProjectHandler) GetAllProjects(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "userId not found", http.StatusUnauthorized)
 		return
 	}
-	projects, err := ph.ProjectService.GetAllProjects(userId)
+	_, err := ph.ProjectService.GetAllProjects(userId)
 	if err != nil {
 		slog.Error("failed to get all projects")
 		return
 	}
 	w.WriteHeader(200)
-	if err := json.NewEncoder(w).Encode(projects); err != nil {
-		slog.Error("failed to encode project")
-		return
-	}
+
 }
 
 func (ph *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {

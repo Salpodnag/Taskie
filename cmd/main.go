@@ -20,8 +20,6 @@ import (
 
 func main() {
 
-	hub := websockets.NewHub()
-
 	lg := logger.New()
 	slog.SetDefault(lg)
 
@@ -42,15 +40,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	hub := websockets.NewHub()
+	wsService := websockets.NewWebSocketService(hub)
+
 	userRepository := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(cfg.JWT, *userRepository)
 	projectRepository := repositories.NewProjectRepository(db)
-	projectService := services.NewProjectService(*projectRepository, *userRepository, hub)
+	projectService := services.NewProjectService(*projectRepository, *userRepository, wsService)
 
 	r := chi.NewRouter()
 
 	r.Use(middlewares.CorsMiddleware)
-	r.Get("/ws", websockets.WsHandler)
+	r.Get("/ws", func(w http.ResponseWriter, r *http.Request) {
+		websockets.WsHandler(w, r, hub)
+	})
 	r.Mount("/auth", routers.NewAuthRouter(*authService))
 
 	r.Group(func(r chi.Router) {
