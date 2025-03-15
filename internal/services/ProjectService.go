@@ -43,19 +43,15 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 	return &project, nil
 }
 
-func (ps *ProjectService) GetWOwner(id int, userID int) (*models.Project, error) {
+func (ps *ProjectService) GetByIdWOwner(id int, userID int) (*models.Project, error) {
 
 	project, err := ps.ProjectRepo.GetProjectById(id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get project by id: %w", err)
+		return nil, err
 	}
-	owner, err := ps.UserRepo.GetUserById(project.Owner.Id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user by id: %w", err)
+	if project.Owner.Id != userID {
+		return nil, fmt.Errorf("nuh-uh, не твой проект:", userID)
 	}
-
-	project.Owner = *owner
-
 	return project, nil
 }
 

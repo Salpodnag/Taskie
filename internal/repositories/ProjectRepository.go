@@ -32,15 +32,20 @@ func (pr *ProjectRepository) CreateProject(project *models.Project) error {
 
 func (pr *ProjectRepository) GetProjectById(id int) (*models.Project, error) {
 	var project models.Project
+	var owner models.User
 	query := `
-			SELECT id, name, created_at, owner_id 
-			FROM project 
-			WHERE id = $1`
+			SELECT p.id, p.name, p.created_at, u.id, u.email, u.username, u.time_registration
+			FROM project p
+			LEFT JOIN user_account u 
+			ON p.owner_id = u.id
+			WHERE p.id = $1`
 	row := pr.db.QueryRow(context.Background(), query, id)
-	err := row.Scan(&project.Id, &project.Name, &project.CreatedAt, &project.Owner.Id)
+
+	err := row.Scan(&project.Id, &project.Name, &project.CreatedAt, &owner.Id, &owner.Email, &owner.Username, &owner.TimeRegistration)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get project by id: %w", err)
+		return nil, fmt.Errorf("failed to get project by id : %w", err)
 	}
+	project.Owner = owner
 	return &project, nil
 }
 

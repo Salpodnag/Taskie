@@ -55,7 +55,6 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middlewares.GetUserID(r)
 	if !ok {
 		slog.Error("user's id not found in Project creation")
-		http.Error(w, "nuh-uh, не твоё!", http.StatusUnauthorized)
 		return
 	}
 
@@ -67,9 +66,10 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 	if id == 0 {
 		slog.Error("missing id", slog.String("id", strconv.Itoa(id)))
 	}
-	project, err := ph.ProjectService.GetWOwner(id, userID)
+	project, err := ph.ProjectService.GetByIdWOwner(id, userID)
 	if err != nil {
-		slog.Error("failed to get project by id", slog.String("id", strconv.Itoa(id)))
+		slog.Error("failed to get project by id: ", err)
+		w.WriteHeader(403)
 		return
 	}
 	w.WriteHeader(200)
