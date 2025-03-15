@@ -44,8 +44,9 @@ func main() {
 	wsService := websockets.NewWebSocketService(hub)
 
 	userRepository := repositories.NewUserRepository(db)
-	authService := services.NewAuthService(cfg.JWT, *userRepository)
+
 	projectRepository := repositories.NewProjectRepository(db)
+	authService := services.NewAuthService(cfg.JWT, *userRepository, *projectRepository, wsService)
 	projectService := services.NewProjectService(*projectRepository, *userRepository, wsService)
 
 	r := chi.NewRouter()

@@ -5,6 +5,7 @@ import (
 	"Taskie/internal/models"
 	"Taskie/internal/repositories"
 	"Taskie/internal/utils"
+	"Taskie/websockets"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,14 +16,18 @@ import (
 )
 
 type AuthService struct {
-	JwtKey   cfg.JWT
-	UserRepo repositories.UserRepository
+	JwtKey           cfg.JWT
+	UserRepo         repositories.UserRepository
+	ProjectRepo      repositories.ProjectRepository
+	WebSocketService *websockets.WebSocketService
 }
 
-func NewAuthService(JWT cfg.JWT, ur repositories.UserRepository) *AuthService {
+func NewAuthService(JWT cfg.JWT, ur repositories.UserRepository, ProjectRepo repositories.ProjectRepository, WebSocketService *websockets.WebSocketService) *AuthService {
 	return &AuthService{
-		JwtKey:   JWT,
-		UserRepo: ur,
+		JwtKey:           JWT,
+		UserRepo:         ur,
+		ProjectRepo:      ProjectRepo,
+		WebSocketService: WebSocketService,
 	}
 }
 
@@ -81,5 +86,11 @@ func (as *AuthService) Login(identifier string, password string) (*models.User, 
 		return nil, "", fmt.Errorf("failed to generate jwtToken %w", err)
 	}
 	user.Password = "Govna v'ebi, a ne password"
+
+	projects, err := as.ProjectRepo.GetAllProjects(user.Id)
+	if err != nil {
+		return nil, "", fmt.Errorf("ошибка)")
+	}
+	as.WebSocketService.SendMessageToUser(user.Id, "projects", projects)
 	return user, token, nil
 }
