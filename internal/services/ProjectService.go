@@ -9,15 +9,17 @@ import (
 )
 
 type ProjectService struct {
-	ProjectRepo      repositories.ProjectRepository
-	UserRepo         repositories.UserRepository
+	ProjectRepo      *repositories.ProjectRepository
+	UserRepo         *repositories.UserRepository
+	RoleRepo         *repositories.RoleRepository
 	WebSocketService *websockets.WebSocketService
 }
 
-func NewProjectService(pr repositories.ProjectRepository, ur repositories.UserRepository, ws *websockets.WebSocketService) *ProjectService {
+func NewProjectService(pr *repositories.ProjectRepository, ur *repositories.UserRepository, rr *repositories.RoleRepository, ws *websockets.WebSocketService) *ProjectService {
 	return &ProjectService{
 		ProjectRepo:      pr,
 		UserRepo:         ur,
+		RoleRepo:         rr,
 		WebSocketService: ws,
 	}
 }
@@ -39,7 +41,7 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 	if err := ps.WebSocketService.SendMessageBroadcast("project", project); err != nil {
 		return nil, fmt.Errorf("failed to send project message: %w", err)
 	}
-	err = ps.ProjectRepo.CreateDefaultRoles(project.Id)
+	err = ps.RoleRepo.CreateDefaultRoles(project.Id)
 	if err != nil {
 		return nil, err
 	}

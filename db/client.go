@@ -5,10 +5,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewClient(cfg *cfg.Config) (*pgx.Conn, error) {
+func NewClient(cfg *cfg.Config) (*pgxpool.Pool, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		cfg.DB.User,
 		cfg.DB.DBPassword,
@@ -16,13 +16,14 @@ func NewClient(cfg *cfg.Config) (*pgx.Conn, error) {
 		cfg.DB.DBPort,
 		cfg.DB.DBName)
 
-	db, err := pgx.Connect(context.Background(), dsn)
+	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, err
 	}
 
 	err = db.Ping(context.Background())
 	if err != nil {
+		db.Close()
 		return nil, err
 	}
 

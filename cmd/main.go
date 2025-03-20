@@ -45,9 +45,11 @@ func main() {
 
 	userRepository := repositories.NewUserRepository(db)
 
+	roleRepository := repositories.NewRoleRepository(db)
+
 	projectRepository := repositories.NewProjectRepository(db)
-	authService := services.NewAuthService(cfg.JWT, *userRepository, *projectRepository, wsService)
-	projectService := services.NewProjectService(*projectRepository, *userRepository, wsService)
+	authService := services.NewAuthService(cfg.JWT, userRepository, projectRepository, wsService)
+	projectService := services.NewProjectService(projectRepository, userRepository, roleRepository, wsService)
 
 	r := chi.NewRouter()
 

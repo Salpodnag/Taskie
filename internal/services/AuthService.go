@@ -17,12 +17,12 @@ import (
 
 type AuthService struct {
 	JwtKey           cfg.JWT
-	UserRepo         repositories.UserRepository
-	ProjectRepo      repositories.ProjectRepository
+	UserRepo         *repositories.UserRepository
+	ProjectRepo      *repositories.ProjectRepository
 	WebSocketService *websockets.WebSocketService
 }
 
-func NewAuthService(JWT cfg.JWT, ur repositories.UserRepository, ProjectRepo repositories.ProjectRepository, WebSocketService *websockets.WebSocketService) *AuthService {
+func NewAuthService(JWT cfg.JWT, ur *repositories.UserRepository, ProjectRepo *repositories.ProjectRepository, WebSocketService *websockets.WebSocketService) *AuthService {
 	return &AuthService{
 		JwtKey:           JWT,
 		UserRepo:         ur,
