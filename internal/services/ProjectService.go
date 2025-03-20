@@ -39,6 +39,10 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 	if err := ps.WebSocketService.SendMessageBroadcast("project", project); err != nil {
 		return nil, fmt.Errorf("failed to send project message: %w", err)
 	}
+	err = ps.ProjectRepo.CreateDefaultRoles(project.Id)
+	if err != nil {
+		return nil, err
+	}
 
 	return &project, nil
 }

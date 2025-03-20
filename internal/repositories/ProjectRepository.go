@@ -85,3 +85,41 @@ func (pr *ProjectRepository) DeleteProject(id int) error {
 	}
 	return nil
 }
+
+func (pr *ProjectRepository) CreateDefaultRoles(projectId int) error {
+	var roleId int
+	query := `
+	SELECT id
+	FROM user_project_role
+	WHERE project_id = $1 AND name='Участник'`
+	err := pr.db.QueryRow(context.Background(), query, projectId).Scan(&roleId)
+	if err == pgx.ErrNoRows {
+		query := `INSERT INTO user_project_role(project_id, name)
+				VALUES ($1, 'Участник')`
+		_, err := pr.db.Exec(context.Background(), query, projectId)
+		if err != nil {
+			return fmt.Errorf("Failed to insert role 'Участник': %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("Failed to check if role 'Участник' exists: %w", err)
+	}
+
+	query = `
+	SELECT id
+	FROM user_project_role
+	WHERE project_id = $1 AND name='Владелец'`
+	err = pr.db.QueryRow(context.Background(), query, projectId).Scan(&roleId)
+	if err == pgx.ErrNoRows {
+		query := `INSERT INTO user_project_role(project_id, name)
+				VALUES ($1, 'Владелец')`
+		_, err := pr.db.Exec(context.Background(), query, projectId)
+		if err != nil {
+			return fmt.Errorf("Failed to insert role 'Владелец': %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("Failed to check if role 'Владелец' exists: %w", err)
+	}
+	return nil
+}
+
+// func (pr *ProjectRepository) AddUserToProject(projectId int, userId int)
