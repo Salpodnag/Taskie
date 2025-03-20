@@ -86,12 +86,16 @@ func (ph *ProjectHandler) GetAllProjects(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "userId not found", http.StatusUnauthorized)
 		return
 	}
-	_, err := ph.ProjectService.GetAllProjectsWOwner(userId)
+	projects, err := ph.ProjectService.GetAllProjectsWOwner(userId)
 	if err != nil {
 		slog.Error("failed to get all projects")
 		return
 	}
 	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(projects); err != nil {
+		slog.Error("failed to encode projects")
+		return
+	}
 
 }
 

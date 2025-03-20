@@ -60,11 +60,11 @@ func (ps *ProjectService) GetAllProjectsWOwner(userId int) ([]models.Project, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all project: %w", err)
 	}
-	ps.WebSocketService.SendMessageBroadcast("projects", projects)
 	return projects, nil
 }
 
 func (ps *ProjectService) Delete(id int) error {
+
 	err := ps.ProjectRepo.DeleteProject(id)
 	if err != nil {
 		return fmt.Errorf("failed to delete project: %w", err)
