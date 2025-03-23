@@ -22,11 +22,11 @@ func (rl *RoleRepository) CreateDefaultRoles(rlojectId int) error {
 	var roleId int
 	query := `
 	SELECT id
-	FROM user_rloject_role
+	FROM user_project_role
 	WHERE rloject_id = $1 AND name='Участник'`
 	err := rl.db.QueryRow(context.Background(), query, rlojectId).Scan(&roleId)
 	if err == pgx.ErrNoRows {
-		query := `INSERT INTO user_rloject_role(rloject_id, name)
+		query := `INSERT INTO user_project_role(project_id, name)
 				VALUES ($1, 'Участник')`
 		_, err := rl.db.Exec(context.Background(), query, rlojectId)
 		if err != nil {
@@ -38,11 +38,11 @@ func (rl *RoleRepository) CreateDefaultRoles(rlojectId int) error {
 
 	query = `
 	SELECT id
-	FROM user_rloject_role
+	FROM user_project_role
 	WHERE rloject_id = $1 AND name='Владелец'`
 	err = rl.db.QueryRow(context.Background(), query, rlojectId).Scan(&roleId)
 	if err == pgx.ErrNoRows {
-		query := `INSERT INTO user_rloject_role(rloject_id, name)
+		query := `INSERT INTO user_project_role(project_id, name)
 				VALUES ($1, 'Владелец')`
 		_, err := rl.db.Exec(context.Background(), query, rlojectId)
 		if err != nil {

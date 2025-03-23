@@ -56,7 +56,7 @@ func (ps *ProjectService) GetByIdWOwner(id int, userID int) (*models.Project, er
 		return nil, err
 	}
 	if project.Owner.Id != userID {
-		return nil, fmt.Errorf("nuh-uh, не твой проект:", userID)
+		return nil, fmt.Errorf("nuh-uh, не твой проект: %d", userID)
 	}
 	return project, nil
 }
