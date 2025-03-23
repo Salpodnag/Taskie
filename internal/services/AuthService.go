@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -50,22 +49,21 @@ func (as *AuthService) CheckUserExists(email string, username string) (bool, err
 }
 
 func (as *AuthService) Register(email string, username string, password string) (*models.User, error) {
-	var user models.User
-	hashedPassword := utils.HashFromPassword(password)
-	user.Email = email
-	user.Username = username
-	user.Password = string(hashedPassword)
-	user.TimeRegistration = time.Now()
+
+	user, err := models.NewUser(email, username, password)
+	if err != nil {
+		return nil, err
+	}
 	if exists, err := as.CheckUserExists(email, username); err != nil {
 		return nil, err
 	} else if exists {
 		return nil, fmt.Errorf("user already exists")
 	}
-	err := as.UserRepo.CreateUser(user)
+	err = as.UserRepo.CreateUser(*user)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 func (as *AuthService) Login(identifier string, password string) (*models.User, string, error) {
@@ -77,7 +75,6 @@ func (as *AuthService) Login(identifier string, password string) (*models.User, 
 		return nil, "", fmt.Errorf("failed to get user by email/username %w", err)
 	}
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
-		// slog.Warn("Invalid password", "identifier", identifier, "user.Password", user.Password, "password", password)
 		slog.Warn("Invalid password comparison", "identifier", identifier, "user.Password", user.Password, "password", password, "error", err)
 		return nil, "", fmt.Errorf("invalid password %w", err)
 	}
@@ -85,7 +82,6 @@ func (as *AuthService) Login(identifier string, password string) (*models.User, 
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to generate jwtToken %w", err)
 	}
-	user.Password = "Govna v'ebi, a ne password"
 
 	projects, err := as.ProjectRepo.GetAllProjects(user.Id)
 	if err != nil {

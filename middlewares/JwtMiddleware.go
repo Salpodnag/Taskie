@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type contextKey string
@@ -34,18 +35,21 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		userIDFloat, ok := claims["user_id"].(float64)
+		userIDSTR, ok := claims["user_id"].(string)
 		if !ok {
 			http.Error(w, "invalid token payload", http.StatusUnauthorized)
 			return
 		}
-		userID := int(userIDFloat)
+		userID, err := uuid.Parse(userIDSTR)
+		if err != nil {
+			return
+		}
 		ctx := context.WithValue(r.Context(), UserIDKey, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-func GetUserID(r *http.Request) (int, bool) {
-	userID, ok := r.Context().Value(UserIDKey).(int)
-	return userID, ok
+func GetUserID(r *http.Request) (uuid.UUID, bool) {
+	UserID, ok := r.Context().Value(UserIDKey).(uuid.UUID)
+	return UserID, ok
 }

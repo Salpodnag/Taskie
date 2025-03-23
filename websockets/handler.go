@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -30,12 +31,11 @@ func WsHandler(w http.ResponseWriter, r *http.Request, hub *Hub) {
 		http.Error(w, "invalid or expired token", http.StatusUnauthorized)
 		return
 	}
-	userIDFloat, ok := claims["user_id"].(float64)
+	userID, ok := claims["user_id"].(uuid.UUID)
 	if !ok {
 		http.Error(w, "invalid token payload", http.StatusUnauthorized)
 		return
 	}
-	userID := int(userIDFloat)
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type ProjectHandler struct {
@@ -54,19 +54,19 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 
 	userID, ok := middlewares.GetUserID(r)
 	if !ok {
-		slog.Error("user's id not found in Project creation")
+		slog.Error("user's id not found in request")
+		http.Error(w, "User not authenticated", http.StatusUnauthorized)
 		return
 	}
 
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	projectID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		slog.Error("invalid id format", slog.String("id", strconv.Itoa(id)))
+		slog.Error("invalid project id format", slog.String("id", projectID.String()), slog.Any("error", err))
+		http.Error(w, "Invalid project ID format", http.StatusBadRequest)
 		return
 	}
-	if id == 0 {
-		slog.Error("missing id", slog.String("id", strconv.Itoa(id)))
-	}
-	project, err := ph.ProjectService.GetByIdWOwner(id, userID)
+
+	project, err := ph.ProjectService.GetByIdWOwner(projectID, userID)
 	if err != nil {
 		slog.Error("failed to get project by id: ", err)
 		w.WriteHeader(403)
@@ -80,13 +80,13 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ph *ProjectHandler) GetAllProjects(w http.ResponseWriter, r *http.Request) {
-	userId, ok := middlewares.GetUserID(r)
+	userID, ok := middlewares.GetUserID(r)
 	if !ok {
 		slog.Error("user's id not found in Project creation")
 		http.Error(w, "userId not found", http.StatusUnauthorized)
 		return
 	}
-	projects, err := ph.ProjectService.GetAllProjectsWOwner(userId)
+	projects, err := ph.ProjectService.GetAllProjectsWOwner(userID)
 	if err != nil {
 		slog.Error("failed to get all projects")
 		return
@@ -100,17 +100,17 @@ func (ph *ProjectHandler) GetAllProjects(w http.ResponseWriter, r *http.Request)
 }
 
 func (ph *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	ProjectID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		slog.Error("invalid id format", slog.String("id", strconv.Itoa(id)))
+		slog.Error("invalid project id", slog.String("id", ProjectID.String()), slog.Any("error", err))
+		http.Error(w, "Invalid project ID", http.StatusBadRequest)
 		return
 	}
-	if id == 0 {
-		slog.Error("missing id", slog.String("id", strconv.Itoa(id)))
-	}
-	err = ph.ProjectService.Delete(id)
+
+	err = ph.ProjectService.Delete(ProjectID)
 	if err != nil {
-		slog.Error("failed to delete project", slog.String("id", strconv.Itoa(id)))
+		slog.Error("failed to delete project", slog.String("id", ProjectID.String()), slog.Any("error", err))
+		http.Error(w, "Failed to delete project", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(204)

@@ -3,6 +3,8 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type WebSocketService struct {
@@ -34,7 +36,7 @@ func (ws *WebSocketService) SendMessageBroadcast(messageType string, data interf
 	return nil
 }
 
-func (ws *WebSocketService) SendMessageToUser(id int, messageType string, data interface{}) error {
+func (ws *WebSocketService) SendMessageToUser(UserID uuid.UUID, messageType string, data interface{}) error {
 
 	message := Message{
 		Type: messageType,
@@ -46,6 +48,6 @@ func (ws *WebSocketService) SendMessageToUser(id int, messageType string, data i
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
 
-	ws.hub.SendToUser(id, messageJSON)
+	ws.hub.SendToUser(UserID, messageJSON)
 	return nil
 }

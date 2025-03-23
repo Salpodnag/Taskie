@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -20,8 +21,8 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 }
 
 func (ur *UserRepository) CreateUser(user models.User) error {
-	err := ur.db.QueryRow(context.Background(), "INSERT INTO user_account(email, username, password, time_registration) VALUES ($1, $2, $3, $4) RETURNING id",
-		user.Email, user.Username, user.Password, user.TimeRegistration).Scan(&user.Id)
+	err := ur.db.QueryRow(context.Background(), "INSERT INTO user_account(id, email, username, password, time_registration) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		user.Id, user.Email, user.Username, user.Password, user.TimeRegistration).Scan(&user.Id)
 	if err != nil {
 		return fmt.Errorf("failed to insert user: %w", err)
 	}
@@ -77,7 +78,7 @@ func (ur *UserRepository) GetUserByUsername(username string) (*models.User, erro
 	return &user, nil
 }
 
-func (ur *UserRepository) GetUserById(id int) (*models.User, error) {
+func (ur *UserRepository) GetUserById(UserID uuid.UUID) (*models.User, error) {
 
 	var user models.User
 
@@ -85,7 +86,7 @@ func (ur *UserRepository) GetUserById(id int) (*models.User, error) {
 			SELECT id, email, username, time_registration 
 			FROM user_account 
 			WHERE  id=$1`
-	row := ur.db.QueryRow(context.Background(), query, id)
+	row := ur.db.QueryRow(context.Background(), query, UserID)
 	err := row.Scan(&user.Id, &user.Email, &user.Username, &user.TimeRegistration)
 	if err != nil {
 		if err == pgx.ErrNoRows {

@@ -5,7 +5,8 @@ import (
 	"Taskie/internal/repositories"
 	"Taskie/websockets"
 	"fmt"
-	"time"
+
+	"github.com/google/uuid"
 )
 
 type ProjectService struct {
@@ -24,18 +25,19 @@ func NewProjectService(pr *repositories.ProjectRepository, ur *repositories.User
 	}
 }
 
-func (ps *ProjectService) Create(name string, userId int) (*models.Project, error) {
-	var project models.Project
-	project.Name = name
-	project.CreatedAt = time.Now()
-	owner, err := ps.UserRepo.GetUserById(userId)
+func (ps *ProjectService) Create(name string, userID uuid.UUID) (*models.Project, error) {
+	owner, err := ps.UserRepo.GetUserById(userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user by id %d: %w", userId, err)
+		return nil, err
 	}
-	project.Owner = *owner
-	err = ps.ProjectRepo.CreateProject(&project)
+	project, err := models.NewProject(name, *owner)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create project: %w", err)
+		return nil, err
+	}
+
+	err = ps.ProjectRepo.CreateProject(project)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := ps.WebSocketService.SendMessageBroadcast("project", project); err != nil {
@@ -46,12 +48,12 @@ func (ps *ProjectService) Create(name string, userId int) (*models.Project, erro
 		return nil, err
 	}
 
-	return &project, nil
+	return project, nil
 }
 
-func (ps *ProjectService) GetByIdWOwner(id int, userID int) (*models.Project, error) {
+func (ps *ProjectService) GetByIdWOwner(projectID uuid.UUID, userID uuid.UUID) (*models.Project, error) {
 
-	project, err := ps.ProjectRepo.GetProjectById(id)
+	project, err := ps.ProjectRepo.GetProjectById(projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,17 +63,17 @@ func (ps *ProjectService) GetByIdWOwner(id int, userID int) (*models.Project, er
 	return project, nil
 }
 
-func (ps *ProjectService) GetAllProjectsWOwner(userId int) ([]models.Project, error) {
-	projects, err := ps.ProjectRepo.GetAllProjects(userId)
+func (ps *ProjectService) GetAllProjectsWOwner(userID uuid.UUID) ([]models.Project, error) {
+	projects, err := ps.ProjectRepo.GetAllProjects(userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all project: %w", err)
 	}
 	return projects, nil
 }
 
-func (ps *ProjectService) Delete(id int) error {
+func (ps *ProjectService) Delete(ProjectID uuid.UUID) error {
 
-	err := ps.ProjectRepo.DeleteProject(id)
+	err := ps.ProjectRepo.DeleteProject(ProjectID)
 	if err != nil {
 		return fmt.Errorf("failed to delete project: %w", err)
 	}

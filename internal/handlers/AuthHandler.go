@@ -55,11 +55,6 @@ func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "need POST method", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var reqBody struct {
 		Identifier string `json:"identifier"`
 		Password   string `json:"password"`
