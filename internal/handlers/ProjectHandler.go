@@ -68,7 +68,7 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 
 	project, err := ph.ProjectService.GetByIdWOwner(projectID, userID)
 	if err != nil {
-		slog.Error("failed to get project by id: ", err)
+		slog.Error("failed to get project by id: %w", err)
 		w.WriteHeader(403)
 		return
 	}

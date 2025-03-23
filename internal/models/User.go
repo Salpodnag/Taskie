@@ -34,10 +34,10 @@ func NewUser(email string, username string, password string) (*User, error) {
 
 func validateUser(email string, username string) error {
 	if email == "" {
-		return fmt.Errorf("empty user email: %w")
+		return fmt.Errorf("empty user email")
 	}
 	if username == "" {
-		return fmt.Errorf("empty user username: %w")
+		return fmt.Errorf("empty user username")
 	}
 
 	return nil
@@ -45,7 +45,7 @@ func validateUser(email string, username string) error {
 
 func validatePassword(password string) error {
 	if password == "" {
-		return fmt.Errorf("empty user password: %w")
+		return fmt.Errorf("empty user password")
 	}
 	return nil
 }
