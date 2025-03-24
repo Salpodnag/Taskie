@@ -49,8 +49,8 @@ func (as *AuthService) CheckUserExists(email string, username string) (bool, err
 	return false, nil
 }
 
-func (as *AuthService) Register(createUserDto dto.CreateUserDTO) (*models.User, error) {
-
+func (as *AuthService) Register(createUserDto dto.CreateUserDTO) (*dto.UserResponseDTO, error) {
+	var userReponse *dto.UserResponseDTO
 	user, err := models.NewUser(createUserDto.Email, createUserDto.Username, createUserDto.Password)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,8 @@ func (as *AuthService) Register(createUserDto dto.CreateUserDTO) (*models.User, 
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	userReponse = dto.UserToResponseDTO(user)
+	return userReponse, nil
 }
 
 func (as *AuthService) Login(identifier string, password string) (*models.User, string, error) {

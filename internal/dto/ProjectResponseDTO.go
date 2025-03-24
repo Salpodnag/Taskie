@@ -7,15 +7,15 @@ import (
 )
 
 type ProjectResponseDTO struct {
-	Id          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Color       string      `json:"color"`
-	Privacy     string      `json:"privacy"`
-	Owner       models.User `json:"user"`
+	Id          uuid.UUID       `json:"id"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Color       string          `json:"color"`
+	Privacy     string          `json:"privacy"`
+	Owner       UserResponseDTO `json:"user"`
 }
 
-func ProjectToResponseDTO(project *models.Project, owner *models.User) *ProjectResponseDTO {
+func ProjectToResponseDTO(project *models.Project, owner *UserResponseDTO) *ProjectResponseDTO {
 	return &ProjectResponseDTO{
 		Id:          project.Id,
 		Name:        project.Name,

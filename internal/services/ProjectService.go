@@ -41,7 +41,7 @@ func (ps *ProjectService) Create(ProjectDTO dto.CreateProjectDTO, userID uuid.UU
 		return nil, err
 	}
 
-	projectResponseDTO := dto.ProjectToResponseDTO(project, owner)
+	projectResponseDTO := dto.ProjectToResponseDTO(project, dto.UserToResponseDTO(owner))
 
 	if err := ps.WebSocketService.SendMessageBroadcast("project", projectResponseDTO); err != nil {
 		return nil, fmt.Errorf("failed to send project message: %w", err)
@@ -54,7 +54,7 @@ func (ps *ProjectService) Create(ProjectDTO dto.CreateProjectDTO, userID uuid.UU
 	return projectResponseDTO, nil
 }
 
-func (ps *ProjectService) GetByIdWOwner(projectID uuid.UUID, userID uuid.UUID) (*models.Project, error) {
+func (ps *ProjectService) GetByIdWOwner(projectID uuid.UUID, userID uuid.UUID) (*dto.ProjectResponseDTO, error) {
 
 	project, err := ps.ProjectRepo.GetProjectById(projectID)
 	if err != nil {
@@ -63,15 +63,22 @@ func (ps *ProjectService) GetByIdWOwner(projectID uuid.UUID, userID uuid.UUID) (
 	if project.Owner.Id != userID {
 		return nil, fmt.Errorf("nuh-uh, не твой проект: %d", userID)
 	}
-	return project, nil
+	projectResponse := dto.ProjectToResponseDTO(project, dto.UserToResponseDTO(&project.Owner))
+	return projectResponse, nil
 }
 
-func (ps *ProjectService) GetAllProjectsWOwner(userID uuid.UUID) ([]models.Project, error) {
+func (ps *ProjectService) GetAllProjectsWOwner(userID uuid.UUID) ([]dto.ProjectResponseDTO, error) {
 	projects, err := ps.ProjectRepo.GetAllProjects(userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all project: %w", err)
 	}
-	return projects, nil
+	projectResponseDtos := make([]dto.ProjectResponseDTO, 0, len(projects))
+	for _, project := range projects {
+		projectResponse := dto.ProjectToResponseDTO(&project, dto.UserToResponseDTO(&project.Owner))
+		projectResponseDtos = append(projectResponseDtos, *projectResponse)
+	}
+
+	return projectResponseDtos, nil
 }
 
 func (ps *ProjectService) Delete(ProjectID uuid.UUID) error {
