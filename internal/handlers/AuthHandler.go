@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Taskie/internal/dto"
 	"Taskie/internal/models"
 	"Taskie/internal/services"
 	"encoding/json"
@@ -25,25 +26,21 @@ func (ah *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqBody struct {
-		Email    string `json:"email"`
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
+	var createUserDto dto.CreateUserDTO
 
-	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&createUserDto); err != nil {
 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 		return
 	}
 
-	if reqBody.Email == "" || reqBody.Username == "" || reqBody.Password == "" {
-		http.Error(w, "email username and password are required", http.StatusBadRequest)
-		return
+	if err := createUserDto.ValidateCreateUser(); err != nil {
+		slog.Error("wrong req body: %w", err)
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 	}
 
-	user, err := ah.authService.Register(reqBody.Email, reqBody.Username, reqBody.Password)
+	user, err := ah.authService.Register(createUserDto)
 	if err != nil {
-		slog.Error("Registration failed", slog.String("email", reqBody.Email), slog.String("username", reqBody.Username))
+		slog.Error("Registration failed", slog.String("email", createUserDto.Email), slog.String("username", createUserDto.Username))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

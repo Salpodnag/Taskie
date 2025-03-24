@@ -31,9 +31,13 @@ func WsHandler(w http.ResponseWriter, r *http.Request, hub *Hub) {
 		http.Error(w, "invalid or expired token", http.StatusUnauthorized)
 		return
 	}
-	userID, ok := claims["user_id"].(uuid.UUID)
+	userIDSTR, ok := claims["user_id"].(string)
 	if !ok {
 		http.Error(w, "invalid token payload", http.StatusUnauthorized)
+		return
+	}
+	userID, err := uuid.Parse(userIDSTR)
+	if err != nil {
 		return
 	}
 

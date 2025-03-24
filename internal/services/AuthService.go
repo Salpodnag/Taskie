@@ -2,6 +2,7 @@ package services
 
 import (
 	"Taskie/cfg"
+	"Taskie/internal/dto"
 	"Taskie/internal/models"
 	"Taskie/internal/repositories"
 	"Taskie/internal/utils"
@@ -48,13 +49,13 @@ func (as *AuthService) CheckUserExists(email string, username string) (bool, err
 	return false, nil
 }
 
-func (as *AuthService) Register(email string, username string, password string) (*models.User, error) {
+func (as *AuthService) Register(createUserDto dto.CreateUserDTO) (*models.User, error) {
 
-	user, err := models.NewUser(email, username, password)
+	user, err := models.NewUser(createUserDto.Email, createUserDto.Username, createUserDto.Password)
 	if err != nil {
 		return nil, err
 	}
-	if exists, err := as.CheckUserExists(email, username); err != nil {
+	if exists, err := as.CheckUserExists(createUserDto.Email, createUserDto.Username); err != nil {
 		return nil, err
 	} else if exists {
 		return nil, fmt.Errorf("user already exists")

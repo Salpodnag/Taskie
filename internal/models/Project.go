@@ -8,21 +8,27 @@ import (
 )
 
 type Project struct {
-	Id        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Owner     User      `json:"user"`
-	CreatedAt time.Time `json:"createdAt"`
+	Id          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Color       string    `json:"color"`
+	Privacy     string    `json:"privacy"`
+	Owner       User      `json:"user"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
-func NewProject(name string, owner User) (*Project, error) {
+func NewProject(name string, owner User, description string, color string, privacy string) (*Project, error) {
 	if err := validateProject(name, owner); err != nil {
 		return nil, err
 	}
 	return &Project{
-		Id:        uuid.New(),
-		Name:      name,
-		Owner:     owner,
-		CreatedAt: time.Now(),
+		Id:          uuid.New(),
+		Name:        name,
+		Description: description,
+		Color:       color,
+		Privacy:     privacy,
+		Owner:       owner,
+		CreatedAt:   time.Now(),
 	}, nil
 }
 

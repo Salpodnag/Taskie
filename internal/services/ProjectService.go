@@ -1,6 +1,7 @@
 package services
 
 import (
+	"Taskie/internal/dto"
 	"Taskie/internal/models"
 	"Taskie/internal/repositories"
 	"Taskie/websockets"
@@ -25,12 +26,12 @@ func NewProjectService(pr *repositories.ProjectRepository, ur *repositories.User
 	}
 }
 
-func (ps *ProjectService) Create(name string, userID uuid.UUID) (*models.Project, error) {
+func (ps *ProjectService) Create(ProjectDTO dto.CreateProjectDTO, userID uuid.UUID) (*dto.ProjectResponseDTO, error) {
 	owner, err := ps.UserRepo.GetUserById(userID)
 	if err != nil {
 		return nil, err
 	}
-	project, err := models.NewProject(name, *owner)
+	project, err := models.NewProject(ProjectDTO.Name, *owner, ProjectDTO.Description, ProjectDTO.Color, ProjectDTO.Privacy)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,9 @@ func (ps *ProjectService) Create(name string, userID uuid.UUID) (*models.Project
 		return nil, err
 	}
 
-	if err := ps.WebSocketService.SendMessageBroadcast("project", project); err != nil {
+	projectResponseDTO := dto.ProjectToResponseDTO(project, owner)
+
+	if err := ps.WebSocketService.SendMessageBroadcast("project", projectResponseDTO); err != nil {
 		return nil, fmt.Errorf("failed to send project message: %w", err)
 	}
 	err = ps.RoleRepo.CreateDefaultRoles(project.Id)
@@ -48,7 +51,7 @@ func (ps *ProjectService) Create(name string, userID uuid.UUID) (*models.Project
 		return nil, err
 	}
 
-	return project, nil
+	return projectResponseDTO, nil
 }
 
 func (ps *ProjectService) GetByIdWOwner(projectID uuid.UUID, userID uuid.UUID) (*models.Project, error) {

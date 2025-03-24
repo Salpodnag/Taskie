@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Taskie/internal/dto"
 	"Taskie/internal/services"
 	"Taskie/middlewares"
 	"encoding/json"
@@ -30,22 +31,16 @@ func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reqBody struct {
-		Name string `json:"name"`
-	}
+	var projectDTO dto.CreateProjectDTO
 
-	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&projectDTO); err != nil {
 		slog.Error("invalid request body", slog.Any("request", r.Body), slog.Any("err", err))
 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 		return
 	}
-	if reqBody.Name == "" {
-		http.Error(w, fmt.Sprintf("Missing name"), http.StatusBadRequest)
-		return
-	}
-	_, err := ph.ProjectService.Create(reqBody.Name, userID)
+	_, err := ph.ProjectService.Create(projectDTO, userID)
 	if err != nil {
-		slog.Error("failed to create project", slog.String("name", reqBody.Name), slog.Any("err", err))
+		slog.Error("failed to create project", slog.String("name", projectDTO.Name), slog.Any("err", err))
 	}
 	w.WriteHeader(http.StatusCreated)
 }
