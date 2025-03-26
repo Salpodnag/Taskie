@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"Taskie/internal/dto"
-	"Taskie/internal/models"
 	"Taskie/internal/services"
 	"encoding/json"
 	"fmt"
@@ -66,11 +65,12 @@ func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+	userDTO := dto.UserToResponseDTO(user)
 	response := struct {
-		User *models.User `json:"user"`
+		User *dto.UserResponseDTO `json:"user"`
 		// Token string       `json:"token"`
 	}{
-		User: user,
+		User: userDTO,
 		// Token: token,
 	}
 	http.SetCookie(w, &http.Cookie{

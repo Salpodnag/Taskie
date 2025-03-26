@@ -22,10 +22,10 @@ func NewProjectRepository(db *pgxpool.Pool) *ProjectRepository {
 
 func (pr *ProjectRepository) CreateProject(project *models.Project) error {
 	query := `
-        INSERT INTO project (id, name, description, color, privacy, created_at, owner_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO project (id, name, description, color, privacy, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id`
-	err := pr.db.QueryRow(context.Background(), query, project.Id, project.Name, project.Description, project.Color, project.Privacy, project.CreatedAt, project.Owner.Id).Scan(&project.Id)
+	err := pr.db.QueryRow(context.Background(), query, project.Id, project.Name, project.Description, project.Color, project.Privacy, project.CreatedAt).Scan(&project.Id)
 	if err != nil {
 		return fmt.Errorf("failed to insert project: %w", err)
 	}
@@ -34,44 +34,36 @@ func (pr *ProjectRepository) CreateProject(project *models.Project) error {
 
 func (pr *ProjectRepository) GetProjectById(projectID uuid.UUID) (*models.Project, error) {
 	var project models.Project
-	var owner models.User
 	query := `
-			SELECT p.id, p.name, p.description, p.color, p.privacy, p.created_at, u.id, u.email, u.username, u.time_registration
+			SELECT p.id, p.name, p.description, p.color, p.privacy, p.created_at
 			FROM project p
-			LEFT JOIN user_account u 
-			ON p.owner_id = u.id
 			WHERE p.id = $1`
 	row := pr.db.QueryRow(context.Background(), query, projectID)
 
-	err := row.Scan(&project.Id, &project.Name, &project.Description, &project.Color, &project.Privacy, &project.CreatedAt, &owner.Id, &owner.Email, &owner.Username, &owner.TimeRegistration)
+	err := row.Scan(&project.Id, &project.Name, &project.Description, &project.Color, &project.Privacy, &project.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get project by id : %w", err)
 	}
-	project.Owner = owner
 	return &project, nil
 }
 
-func (pr *ProjectRepository) GetAllProjects(UserID uuid.UUID) ([]models.Project, error) {
+func (pr *ProjectRepository) GetAllProjects() ([]models.Project, error) {
 	projects := make([]models.Project, 0)
 	query := `
-			SELECT p.id, p.name, p.description, p.color, p.privacy, p.created_at, u.id, u.email, u.username, u.time_registration
+			SELECT p.id, p.name, p.description, p.color, p.privacy, p.created_at
 			FROM project p
-			LEFT JOIN user_account u 
-			ON p.owner_id = u.id
-			WHERE u.id = $1`
-	rows, err := pr.db.Query(context.Background(), query, UserID)
+			`
+	rows, err := pr.db.Query(context.Background(), query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all projects: %w", err)
 	}
 	for rows.Next() {
 		var project models.Project
-		var owner models.User
-		err := rows.Scan(&project.Id, &project.Name, &project.Description, &project.Color, &project.Privacy, &project.CreatedAt, &owner.Id, &owner.Email, &owner.Username, &owner.TimeRegistration)
+		err := rows.Scan(&project.Id, &project.Name, &project.Description, &project.Color, &project.Privacy, &project.CreatedAt)
 		if err != nil {
 			slog.Error("???: %w", err)
 			return nil, fmt.Errorf("failed to get all projects: %w", err)
 		}
-		project.Owner = owner
 		projects = append(projects, project)
 	}
 

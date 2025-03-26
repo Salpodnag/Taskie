@@ -24,7 +24,7 @@ func NewProjectHandler(ProjectService services.ProjectService) *ProjectHandler {
 }
 
 func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middlewares.GetUserID(r)
+	_, ok := middlewares.GetUserID(r)
 	if !ok {
 		slog.Error("user's id not found in Project creation")
 		http.Error(w, "userId not found", http.StatusUnauthorized)
@@ -38,7 +38,7 @@ func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 		return
 	}
-	_, err := ph.ProjectService.Create(projectDTO, userID)
+	_, err := ph.ProjectService.Create(projectDTO)
 	if err != nil {
 		slog.Error("failed to create project", slog.String("name", projectDTO.Name), slog.Any("err", err))
 	}
@@ -47,7 +47,7 @@ func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 
-	userID, ok := middlewares.GetUserID(r)
+	_, ok := middlewares.GetUserID(r)
 	if !ok {
 		slog.Error("user's id not found in request")
 		http.Error(w, "User not authenticated", http.StatusUnauthorized)
@@ -61,7 +61,7 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	project, err := ph.ProjectService.GetByIdWOwner(projectID, userID)
+	project, err := ph.ProjectService.GetByIdWOwner(projectID)
 	if err != nil {
 		slog.Error("failed to get project by id: %w", err)
 		w.WriteHeader(403)
@@ -75,13 +75,13 @@ func (ph *ProjectHandler) GetById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ph *ProjectHandler) GetAllProjects(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middlewares.GetUserID(r)
+	_, ok := middlewares.GetUserID(r)
 	if !ok {
 		slog.Error("user's id not found in Project creation")
 		http.Error(w, "userId not found", http.StatusUnauthorized)
 		return
 	}
-	projects, err := ph.ProjectService.GetAllProjectsWOwner(userID)
+	projects, err := ph.ProjectService.GetAllProjectsWOwner()
 	if err != nil {
 		slog.Error("failed to get all projects")
 		return

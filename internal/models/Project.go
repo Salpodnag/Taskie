@@ -13,12 +13,11 @@ type Project struct {
 	Description string    `json:"description"`
 	Color       string    `json:"color"`
 	Privacy     string    `json:"privacy"`
-	Owner       User      `json:"user"`
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
-func NewProject(name string, owner User, description string, color string, privacy string) (*Project, error) {
-	if err := validateProject(name, owner); err != nil {
+func NewProject(name string, description string, color string, privacy string) (*Project, error) {
+	if err := validateProject(name); err != nil {
 		return nil, err
 	}
 	return &Project{
@@ -27,17 +26,13 @@ func NewProject(name string, owner User, description string, color string, priva
 		Description: description,
 		Color:       color,
 		Privacy:     privacy,
-		Owner:       owner,
 		CreatedAt:   time.Now(),
 	}, nil
 }
 
-func validateProject(name string, owner User) error {
+func validateProject(name string) error {
 	if name == "" {
 		return fmt.Errorf("empty project name")
-	}
-	if err := validateUser(owner.Email, owner.Username); err != nil {
-		return fmt.Errorf("empty owner: %w", err)
 	}
 	return nil
 }

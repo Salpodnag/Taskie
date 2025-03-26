@@ -85,7 +85,7 @@ func (as *AuthService) Login(identifier string, password string) (*models.User, 
 		return nil, "", fmt.Errorf("failed to generate jwtToken %w", err)
 	}
 
-	projects, err := as.ProjectRepo.GetAllProjects(user.Id)
+	projects, err := as.ProjectRepo.GetAllProjects()
 	if err != nil {
 		return nil, "", fmt.Errorf("ошибка)")
 	}

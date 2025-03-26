@@ -19,38 +19,23 @@ func NewRoleRepository(db *pgxpool.Pool) *RoleRepository {
 	}
 }
 
-func (rl *RoleRepository) CreateDefaultRoles(ProjectID uuid.UUID) error {
+func (rl *RoleRepository) CreateDefaultRole(ProjectID uuid.UUID, role string) error {
 	var roleId int
 	query := `
 	SELECT id
 	FROM user_project_role
-	WHERE project_id = $1 AND name='Участник'`
-	err := rl.db.QueryRow(context.Background(), query, ProjectID).Scan(&roleId)
+	WHERE project_id = $1 AND name=$2`
+	err := rl.db.QueryRow(context.Background(), query, ProjectID, role).Scan(&roleId)
 	if err == pgx.ErrNoRows {
 		query := `INSERT INTO user_project_role(project_id, name)
-				VALUES ($1, 'Участник')`
-		_, err := rl.db.Exec(context.Background(), query, ProjectID)
+				VALUES ($1, $2)`
+		_, err := rl.db.Exec(context.Background(), query, ProjectID, role)
 		if err != nil {
-			return fmt.Errorf("Failed to insert role 'Участник': %w", err)
+			return fmt.Errorf("failed to insert role: %w", err, role)
 		}
 	} else if err != nil {
-		return fmt.Errorf("Failed to check if role 'Участник' exists: %w", err)
+		return fmt.Errorf("failed to check if role 'Участник' exists: %w", err, "role", role)
 	}
 
-	query = `
-	SELECT id
-	FROM user_project_role
-	WHERE project_id = $1 AND name='Владелец'`
-	err = rl.db.QueryRow(context.Background(), query, ProjectID).Scan(&roleId)
-	if err == pgx.ErrNoRows {
-		query := `INSERT INTO user_project_role(project_id, name)
-				VALUES ($1, 'Владелец')`
-		_, err := rl.db.Exec(context.Background(), query, ProjectID)
-		if err != nil {
-			return fmt.Errorf("Failed to insert role 'Владелец': %w", err)
-		}
-	} else if err != nil {
-		return fmt.Errorf("Failed to check if role 'Владелец' exists: %w", err)
-	}
 	return nil
 }
