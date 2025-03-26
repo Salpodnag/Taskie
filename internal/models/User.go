@@ -28,7 +28,7 @@ func NewUser(email string, username string, password string) (*User, error) {
 		Email:            email,
 		Username:         username,
 		Password:         string(utils.HashFromPassword(password)),
-		TimeRegistration: time.Now(),
+		TimeRegistration: time.Now().UTC().Add(time.Hour * 3),
 	}, nil
 }
 

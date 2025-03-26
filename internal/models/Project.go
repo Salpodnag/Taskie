@@ -26,7 +26,7 @@ func NewProject(name string, description string, color string, privacy string) (
 		Description: description,
 		Color:       color,
 		Privacy:     privacy,
-		CreatedAt:   time.Now(),
+		CreatedAt:   time.Now().UTC().Add(time.Hour * 3),
 	}, nil
 }
 
