@@ -23,11 +23,12 @@ func NewProjectRepository(db *pgxpool.Pool) *ProjectRepository {
 func (pr *ProjectRepository) CreateProject(project *models.Project) error {
 	query := `
         INSERT INTO project (id, name, description, color, privacy, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id`
-	err := pr.db.QueryRow(context.Background(), query, project.Id, project.Name, project.Description, project.Color, project.Privacy, project.CreatedAt).Scan(&project.Id)
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
+	err := pr.db.QueryRow(context.Background(), query,
+		project.Id, project.Name, project.Description, project.Color, project.Privacy, project.CreatedAt).
+		Scan(&project.Id)
 	if err != nil {
-		return fmt.Errorf("failed to insert project: %w", err)
+		return fmt.Errorf("failed to insert project", query, project.Id, project.Name, project.Description, project.Color, project.Privacy, project.CreatedAt)
 	}
 	return nil
 }

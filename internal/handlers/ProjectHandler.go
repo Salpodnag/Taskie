@@ -38,9 +38,15 @@ func (ph *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 		return
 	}
-	_, err := ph.ProjectService.Create(projectDTO)
+	userID, ok := middlewares.GetUserID(r)
+	if !ok {
+		slog.Error("user's id not found in request")
+		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		return
+	}
+	_, err := ph.ProjectService.Create(userID, projectDTO)
 	if err != nil {
-		slog.Error("failed to create project", slog.String("name", projectDTO.Name), slog.Any("err", err))
+		slog.Error("failed to create project: %w", err)
 	}
 	w.WriteHeader(http.StatusCreated)
 }

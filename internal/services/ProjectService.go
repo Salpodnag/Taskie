@@ -6,6 +6,7 @@ import (
 	"Taskie/internal/repositories"
 	"Taskie/websockets"
 	"fmt"
+	"log/slog"
 
 	"github.com/google/uuid"
 )
@@ -33,7 +34,7 @@ const (
 	Participant string = "Участник"
 )
 
-func (ps *ProjectService) Create(ProjectDTO dto.CreateProjectDTO) (*dto.ProjectResponseDTO, error) {
+func (ps *ProjectService) Create(userID uuid.UUID, ProjectDTO dto.CreateProjectDTO) (*dto.ProjectResponseDTO, error) {
 
 	project, err := models.NewProject(ProjectDTO.Name, ProjectDTO.Description, ProjectDTO.Color, ProjectDTO.Privacy)
 	if err != nil {
@@ -48,18 +49,21 @@ func (ps *ProjectService) Create(ProjectDTO dto.CreateProjectDTO) (*dto.ProjectR
 	projectResponseDTO := dto.ProjectToResponseDTO(project)
 
 	if err := ps.WebSocketService.SendMessageBroadcast("project", projectResponseDTO); err != nil {
-		return nil, fmt.Errorf("failed to send project message: %w", err)
-	}
-	err = ps.RoleRepo.CreateDefaultRole(project.Id, Owner)
-	if err != nil {
 		return nil, err
 	}
-	err = ps.RoleRepo.CreateDefaultRole(project.Id, Participant)
+	slog.Error("или тут ошибка %w", err)
+
+	roleID, err := ps.createDefaultRolesForProject(project.Id)
 	if err != nil {
+		slog.Error("тут ошибка %w", err)
 		return nil, err
 	}
 
-	// err = ps.UserProjectRepo.AddUserToProject()!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	err = ps.UserProjectRepo.AddUserToProject(userID, project.Id, roleID)
+	if err != nil {
+		slog.Error("нееее тут ошибка %w", err)
+		return nil, err
+	}
 	return projectResponseDTO, nil
 }
 
@@ -94,4 +98,22 @@ func (ps *ProjectService) Delete(ProjectID uuid.UUID) error {
 		return fmt.Errorf("failed to delete project: %w", err)
 	}
 	return nil
+}
+
+func (ps *ProjectService) createDefaultRolesForProject(projectID uuid.UUID) (int, error) {
+	roles := []string{Owner, Participant}
+	var ownerRoleID int
+
+	for _, role := range roles {
+		roleID, err := ps.RoleRepo.GetOrCreateDefaultRole(projectID, role)
+		if err != nil {
+			return 0, fmt.Errorf("failed to create role '%s': %w", role, err)
+		}
+
+		if role == Owner {
+			ownerRoleID = roleID
+		}
+	}
+
+	return ownerRoleID, nil
 }
