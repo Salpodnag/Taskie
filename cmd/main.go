@@ -49,6 +49,7 @@ func main() {
 	userProjectRepository := repositories.NewUserProjectRepository(db)
 
 	projectRepository := repositories.NewProjectRepository(db)
+	userService := services.NewUserService(userRepository)
 	authService := services.NewAuthService(cfg.JWT, userRepository, projectRepository, wsService)
 	projectService := services.NewProjectService(projectRepository, userRepository, roleRepository, userProjectRepository, wsService)
 
@@ -62,7 +63,8 @@ func main() {
 
 	r.Group(func(r chi.Router) {
 		r.Use(middlewares.JWTMiddleware)
-		r.Mount("/project", routers.NewProjectRouter(*projectService))
+		r.Mount("/projects", routers.NewProjectRouter(*projectService))
+		r.Mount("/users", routers.NewUserRouter(*userService, *projectService))
 	})
 
 	port := ":8080"

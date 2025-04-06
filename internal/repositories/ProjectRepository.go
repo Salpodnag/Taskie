@@ -4,7 +4,6 @@ import (
 	"Taskie/internal/models"
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -55,6 +54,7 @@ func (pr *ProjectRepository) GetAllProjects() ([]models.Project, error) {
 			FROM project p
 			`
 	rows, err := pr.db.Query(context.Background(), query)
+	defer rows.Close()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all projects: %w", err)
 	}
@@ -62,7 +62,6 @@ func (pr *ProjectRepository) GetAllProjects() ([]models.Project, error) {
 		var project models.Project
 		err := rows.Scan(&project.Id, &project.Name, &project.Description, &project.Color, &project.Privacy, &project.CreatedAt)
 		if err != nil {
-			slog.Error("???: %w", err)
 			return nil, fmt.Errorf("failed to get all projects: %w", err)
 		}
 		projects = append(projects, project)

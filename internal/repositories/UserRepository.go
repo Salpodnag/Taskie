@@ -96,3 +96,28 @@ func (ur *UserRepository) GetUserById(UserID uuid.UUID) (*models.User, error) {
 	}
 	return &user, nil
 }
+
+func (ur *UserRepository) AllUsers() ([]*models.User, error) {
+	users := make([]*models.User, 0)
+	query := `SELECT 
+	id, email, username, password, time_registration 
+	FROM user_account`
+	rows, err := ur.db.Query(context.Background(), query)
+	defer rows.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all users %w", err)
+	}
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.Id, &user.Email, &user.Username, &user.Password, &user.TimeRegistration)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan user from db to instance %w", err)
+		}
+		users = append(users, &user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
+
+	return users, nil
+}

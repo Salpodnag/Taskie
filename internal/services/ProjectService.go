@@ -6,7 +6,6 @@ import (
 	"Taskie/internal/repositories"
 	"Taskie/websockets"
 	"fmt"
-	"log/slog"
 
 	"github.com/google/uuid"
 )
@@ -29,14 +28,9 @@ func NewProjectService(pr *repositories.ProjectRepository, ur *repositories.User
 	}
 }
 
-const (
-	Owner       string = "Владелец"
-	Participant string = "Участник"
-)
+func (ps *ProjectService) Create(userID uuid.UUID, projectDTO dto.CreateProjectDTO) (*dto.ProjectResponseDTO, error) {
 
-func (ps *ProjectService) Create(userID uuid.UUID, ProjectDTO dto.CreateProjectDTO) (*dto.ProjectResponseDTO, error) {
-
-	project, err := models.NewProject(ProjectDTO.Name, ProjectDTO.Description, ProjectDTO.Color, ProjectDTO.Privacy)
+	project, err := models.NewProject(projectDTO.Name, projectDTO.Description, projectDTO.Color, projectDTO.Privacy)
 	if err != nil {
 		return nil, err
 	}
@@ -51,17 +45,14 @@ func (ps *ProjectService) Create(userID uuid.UUID, ProjectDTO dto.CreateProjectD
 	if err := ps.WebSocketService.SendMessageBroadcast("project", projectResponseDTO); err != nil {
 		return nil, err
 	}
-	slog.Error("или тут ошибка %w", err)
 
 	roleID, err := ps.createDefaultRolesForProject(project.Id)
 	if err != nil {
-		slog.Error("тут ошибка %w", err)
 		return nil, err
 	}
 
 	err = ps.UserProjectRepo.AddUserToProject(userID, project.Id, roleID)
 	if err != nil {
-		slog.Error("нееее тут ошибка %w", err)
 		return nil, err
 	}
 	return projectResponseDTO, nil
@@ -91,29 +82,11 @@ func (ps *ProjectService) GetAllProjectsWOwner() (*[]dto.ProjectResponseDTO, err
 	return &projectResponseDtos, nil
 }
 
-func (ps *ProjectService) Delete(ProjectID uuid.UUID) error {
+func (ps *ProjectService) Delete(projectID uuid.UUID) error {
 
-	err := ps.ProjectRepo.DeleteProject(ProjectID)
+	err := ps.ProjectRepo.DeleteProject(projectID)
 	if err != nil {
 		return fmt.Errorf("failed to delete project: %w", err)
 	}
 	return nil
-}
-
-func (ps *ProjectService) createDefaultRolesForProject(projectID uuid.UUID) (int, error) {
-	roles := []string{Owner, Participant}
-	var ownerRoleID int
-
-	for _, role := range roles {
-		roleID, err := ps.RoleRepo.GetOrCreateDefaultRole(projectID, role)
-		if err != nil {
-			return 0, fmt.Errorf("failed to create role '%s': %w", role, err)
-		}
-
-		if role == Owner {
-			ownerRoleID = roleID
-		}
-	}
-
-	return ownerRoleID, nil
 }
